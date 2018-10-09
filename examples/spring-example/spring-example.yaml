@@ -41,6 +41,18 @@ spec:
     app: spring-example
 ---
 
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: spring-example
+  name: spring-example
+spec:
+  to:
+    kind: Service
+    name: spring-example
+---
+
 apiVersion: v1
 kind: DeploymentConfig
 metadata:
@@ -55,7 +67,6 @@ spec:
           - spring-example
         from:
           kind: ImageStreamTag
-          namespace: spring-example
           name: 'spring-example:latest'
   replicas: 1
   template:
