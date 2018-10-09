@@ -64,7 +64,7 @@ oc exec $pod -- cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt > /tmp/
 
 vault auth enable -tls-skip-verify kubernetes
 
-export OPENSHIFT_HOST=https://192.168.64.12:8443
+export OPENSHIFT_HOST=https://openshift-master.openlab.red
 
 vault write -tls-skip-verify auth/kubernetes/config token_reviewer_jwt=$reviewer_service_account_jwt kubernetes_host=$OPENSHIFT_HOST kubernetes_ca_cert=@/tmp/ca.crt
 ```
