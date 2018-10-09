@@ -46,7 +46,7 @@ spec:
         - mountPath: /vault/config/agent.config
           subPath: agent.config
           name: vault-config
-        - mountPath: /tmp/vault-agent
+        - mountPath: /var/run/secrets/vaultproject.io
           name: vault-agent-volume
       volumes:
       - name: vault-agent-volume
