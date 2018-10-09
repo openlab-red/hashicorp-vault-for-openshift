@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-agent-config
+data:
+  vault-agent-config: |-
+    pid_file = "/tmp/vault-agent/pid"
+
+    auto_auth {
+            method "kubernetes"  {
+                    type = "kubernetes"
+                    mount_path = "auth/kubernetes"
+                    config = {
+                            role = "example"
+                            jwt = "@/var/run/secrets/kubernetes.io/serviceaccount/token"
+                    }
+            }
+
+            sink "file" {
+                    type = "file"
+                    wrap_ttl = "1m"
+                    config = {
+                            path = "/tmp/vault-agent/token"
+                    }
+            }
+    }
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: spring-example
+  name: spring-example
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: spring-example
+---
+
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: spring-example
+spec:
+  triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - spring-example
+        from:
+          kind: ImageStreamTag
+          namespace: spring-example
+          name: 'spring-example:latest'
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: spring-example       
+    spec:
+      containers:
+        - name: spring-example
+          image: "spring-example:latest"
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 3
+          volumeMounts:
+          - mountPath: /tmp/vault-agent
+            name: vault-agent-volume
+        - image: vault:latest
+          name: vault-agent
+          args:
+          - agent
+          - -log-level=debug
+          - -config=/vault/config/agent.config
+          env:
+          - name: SKIP_SETCAP
+            value: 'true'
+          - name: "VAULT_ADDR"
+            value: "https://vault.hashicorp.svc:8200"
+          - name: "VAULT_CAPATH"
+            value: "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
+          volumeMounts:
+          - mountPath: /vault/config/agent.config
+            subPath: agent.config
+            name: vault-config
+          - mountPath: /tmp/vault-agent
+            name: vault-agent-volume
+        volumes:
+        - name: vault-agent-volume
+          emptyDir:
+            medium: Memory
+        - configMap:
+            items:
+              - key: vault-agent-config
+                path: agent.config
+            name: vault-agent-config
+          name: vault-config

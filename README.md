@@ -167,6 +167,11 @@ vault read -tls-skip-verify secret/example
 
 TBD
 
+```
+oc project app
+```
+
+
 ### Agent Vault
 
 
