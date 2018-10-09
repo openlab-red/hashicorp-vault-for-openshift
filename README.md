@@ -119,7 +119,6 @@ token_meta_role                           example
 token_meta_service_account_name           default
 ```
 
-
 Read the secret:
 
 ```
@@ -127,7 +126,9 @@ export VAULT_TOKEN=8cpdTdQZYbBpZJrjH6F9OXco
 vault read -tls-skip-verify secret/example
 ```
 
-## Standalone Agent Vault
+# Agent Vault
+
+## Standalone
 
 ```
 oc project app
