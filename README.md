@@ -139,7 +139,7 @@ oc create configmap vault-agent-config --from-file=vault-agent-config=agent/vaul
 oc create -f agent/vault-agent.yaml
 ```
 
-Find token under */tmp/token*
+Find token under */var/run/secrets/vaultproject.io/token*
 
 ```
 pod=$(oc get pods -lapp=vault-agent --no-headers -o custom-columns=NAME:.metadata.name)
