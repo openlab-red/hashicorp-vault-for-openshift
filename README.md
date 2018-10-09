@@ -124,7 +124,7 @@ token_meta_service_account_name           default
 Read the secret:
 
 ```
-export VAULT_TOKEN=8cpdTdQZYbBpZJrjH6F9OXco
+export VAULT_TOKEN=wLflBsnHbEfJSsKYIdLVLrnx
 vault read -tls-skip-verify secret/example
 ```
 
@@ -143,7 +143,7 @@ Find token under */tmp/token*
 
 ```
 pod=$(oc get pods -lapp=vault-agent --no-headers -o custom-columns=NAME:.metadata.name)
-oc exec $pod -- cat /tmp/token
+oc exec $pod -- cat /var/run/secrets/vaultproject.io/token
 
 ```
 
