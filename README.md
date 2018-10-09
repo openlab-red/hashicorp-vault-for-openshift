@@ -3,6 +3,8 @@
 ## Deploy
 
 ```
+oc new-project hashicorp
+
 oc adm policy add-scc-to-user privileged -z default
 
 oc create configmap vault-config --from-file=vault-config=vault-config.json
