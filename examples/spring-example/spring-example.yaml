@@ -101,13 +101,13 @@ spec:
             name: vault-config
           - mountPath: /tmp/vault-agent
             name: vault-agent-volume
-        volumes:
-        - name: vault-agent-volume
-          emptyDir:
-            medium: Memory
-        - configMap:
-            items:
-              - key: vault-agent-config
-                path: agent.config
-            name: vault-agent-config
-          name: vault-config
+      volumes:
+      - name: vault-agent-volume
+        emptyDir:
+          medium: Memory
+      - configMap:
+          items:
+            - key: vault-agent-config
+              path: agent.config
+          name: vault-agent-config
+        name: vault-config
