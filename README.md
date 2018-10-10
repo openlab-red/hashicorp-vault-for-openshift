@@ -177,7 +177,7 @@ oc project app
 ### Agent Vault
 
 
-### Secret Retriever
+### Vault Token Handler
 
 
 # References
