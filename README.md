@@ -171,7 +171,7 @@ vault read -tls-skip-verify secret/example
 oc project app
 ```
 
-Using Agent Vault as sidecar container and  [Vault Agent Token Handler ](https://github.com/openlab-red/vault-agent-token-handler)
+Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-red/vault-agent-token-handler) as sidecar containers
 
 ### Spring Example
 
