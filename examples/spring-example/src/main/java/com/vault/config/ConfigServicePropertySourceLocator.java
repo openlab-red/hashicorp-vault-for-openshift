@@ -11,7 +11,6 @@ import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.cloud.config.client.ConfigClientProperties;
 import org.springframework.cloud.config.environment.Environment;
 import org.springframework.cloud.config.environment.PropertySource;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.MapPropertySource;
