@@ -150,14 +150,15 @@ public class ConfigServicePropertySourceLocator implements PropertySourceLocator
                 StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
 
         WatchKey watchKey = watchService.take();
-        for (final WatchEvent<?> event : watchKey.pollEvents()) {
-            Path entry = (Path) event.context();
-            if (vaultProperties.equalsIgnoreCase(entry.toString())) {
-                File file = directoryPath.resolve(entry).toFile();
-                return propertySource(name, result, mapper, file);
+        while (true) {
+            for (final WatchEvent<?> event : watchKey.pollEvents()) {
+                Path entry = (Path) event.context();
+                if (vaultProperties.equalsIgnoreCase(entry.toString())) {
+                    File file = directoryPath.resolve(entry).toFile();
+                    return propertySource(name, result, mapper, file);
+                }
             }
         }
-        return null;
     }
 
     private Environment propertySource(String name, Environment result, ObjectMapper mapper, File file) throws java.io.IOException {
