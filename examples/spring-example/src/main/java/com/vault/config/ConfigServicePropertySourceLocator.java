@@ -35,7 +35,7 @@ public class ConfigServicePropertySourceLocator implements PropertySourceLocator
         this.defaultProperties = defaultProperties;
     }
 
-    @Value("${vault.file:/var/run/secrets/vaultproject.io/application.yml}")
+    @Value("${vault.file:/var/run/secrets/vaultproject.io/application.yaml}")
     private String path;
 
     @Override
