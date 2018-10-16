@@ -18,6 +18,6 @@ public class SecretController {
 
 	@RequestMapping("/secret")
 	public String secret() {
-		return "my secret is" + password;
+		return "my secret is " + password;
 	}
 }

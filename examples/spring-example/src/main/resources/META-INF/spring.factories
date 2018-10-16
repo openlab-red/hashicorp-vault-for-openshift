@@ -1,0 +1,2 @@
+# Bootstrap components
+org.springframework.cloud.bootstrap.BootstrapConfiguration=com.vault.config.ConfigServicePropertySourceLocator

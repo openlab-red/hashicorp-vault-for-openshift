@@ -1,2 +1,3 @@
 spring.application.name: spring-example
+spring.cloud.config.discovery.enabled: false
 logging.level.org.springframework: info
