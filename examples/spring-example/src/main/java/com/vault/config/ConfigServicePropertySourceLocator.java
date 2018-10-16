@@ -89,7 +89,7 @@ public class ConfigServicePropertySourceLocator implements PropertySourceLocator
             throw new IllegalStateException(
                     "Could not locate PropertySource and the fail fast property is set, failing", error);
         }
-        logger.warn("Could not locate PropertySource:  " + error.getMessage());
+        logger.warn("Could not locate PropertySource:  " + error);
         return null;
 
     }
@@ -151,13 +151,9 @@ public class ConfigServicePropertySourceLocator implements PropertySourceLocator
 
         WatchKey watchKey = watchService.take();
         for (final WatchEvent<?> event : watchKey.pollEvents()) {
-            WatchEvent.Kind<?> kind = event.kind();
-            logger.info(kind);
             Path entry = (Path) event.context();
-            logger.info(entry);
             if (vaultProperties.equalsIgnoreCase(entry.toString())) {
                 File file = directoryPath.resolve(entry).toFile();
-                logger.info(file);
                 return propertySource(name, result, mapper, file);
             }
         }
