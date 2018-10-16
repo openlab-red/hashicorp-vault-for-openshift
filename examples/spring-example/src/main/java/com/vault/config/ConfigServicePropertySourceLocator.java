@@ -17,6 +17,7 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,10 +36,10 @@ public class ConfigServicePropertySourceLocator implements PropertySourceLocator
         this.defaultProperties = defaultProperties;
     }
 
-    @Value("${vault.vaultPath:/var/run/secrets/vaultproject.io}")
+    @Value("${vault.path:/var/run/secrets/vaultproject.io}")
     private String vaultPath;
 
-    @Value("${vault.properties:application.yaml}")
+    @Value("${vault.name:application.yaml}")
     private String vaultProperties;
 
     @Override
@@ -56,8 +57,7 @@ public class ConfigServicePropertySourceLocator implements PropertySourceLocator
                         .commaDelimitedListToStringArray(properties.getLabel());
             }
             for (String label : labels) {
-                Environment result = getEnvironment(properties,
-                        label.trim());
+                Environment result = getEnvironment(properties);
                 if (result != null) {
                     log(result);
 
@@ -126,35 +126,50 @@ public class ConfigServicePropertySourceLocator implements PropertySourceLocator
     }
 
     private Environment getEnvironment(
-            ConfigClientProperties properties, String label) throws Exception {
+            ConfigClientProperties properties) throws Exception {
         String name = properties.getName();
         String profile = properties.getProfile();
         Environment result = new Environment(name, profile);
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
+        Path path = FileSystems.getDefault().getPath(vaultPath + "/" + vaultProperties);
+        File file = path.toFile();
+
+        if (file.exists()) {
+            return propertySource(name, result, mapper, file);
+        }
+
+        return watchPath(name, result, mapper);
+    }
+
+    private Environment watchPath(String name, Environment result, ObjectMapper mapper) throws IOException, InterruptedException {
         Path directoryPath = FileSystems.getDefault().getPath(vaultPath);
 
         WatchService watchService = FileSystems.getDefault().newWatchService();
         directoryPath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
                 StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
 
-        while (true) {
-            WatchKey watchKey = watchService.take();
-            for (final WatchEvent<?> event : watchKey.pollEvents()) {
-                WatchEvent.Kind<?> kind = event.kind();
-                if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE) || kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
-                    Path entry = (Path) event.context();
-                    if (vaultProperties.equalsIgnoreCase(entry.toString())) {
-                        File file = directoryPath.resolve(entry).toFile();
-                        if (file.exists()) {
-                            TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
-                            };
-                            result.add(new PropertySource(name, mapper.readValue(file, typeRef)));
-                            return result;
-                        }
-                    }
-                }
+        WatchKey watchKey = watchService.take();
+        for (final WatchEvent<?> event : watchKey.pollEvents()) {
+            WatchEvent.Kind<?> kind = event.kind();
+            logger.info(kind);
+            Path entry = (Path) event.context();
+            logger.info(entry);
+            if (vaultProperties.equalsIgnoreCase(entry.toString())) {
+                File file = directoryPath.resolve(entry).toFile();
+                logger.info(file);
+                return propertySource(name, result, mapper, file);
             }
         }
+        return null;
+    }
+
+    private Environment propertySource(String name, Environment result, ObjectMapper mapper, File file) throws java.io.IOException {
+        TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
+        };
+        result.add(new PropertySource(name, mapper.readValue(file, typeRef)));
+        result.setState("OK");
+        result.setVersion(String.valueOf(file.lastModified()));
+        return result;
     }
 }
