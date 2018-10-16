@@ -1,9 +1,9 @@
 # Vault
 
-## Deploy
+## Prep and Deploy
 
 ```
-oc new-project hashicorp
+oc new-project hashicorp-vault
 
 oc adm policy add-scc-to-user privileged -z default
 
@@ -17,7 +17,7 @@ oc create route reencrypt vault --port=8200 --service=vault
 ### With SDN Multi Tenant
 
 ```
-oc adm  pod-network make-projects-global hashicorp
+oc adm  pod-network make-projects-global hashicorp-vault
 ```
 
 ### With SDN Network Policy
@@ -25,7 +25,7 @@ oc adm  pod-network make-projects-global hashicorp
 TBD
 
 
-## Configuration
+## Vault Operations and Configuration
 
 ```
 export VAULT_ADDR=https://$(oc get route vault --no-headers -o custom-columns=HOST:.spec.host)
@@ -54,7 +54,7 @@ Unseal the vault
 vault operator unseal -tls-skip-verify $KEYS
 ```
 
-## Kubernetes Auth
+## Kubernetes Auth Configuration
 
 ```
 oc create sa vault-auth
@@ -71,7 +71,7 @@ export OPENSHIFT_HOST=https://openshift-master.openlab.red
 vault write -tls-skip-verify auth/kubernetes/config token_reviewer_jwt=$reviewer_service_account_jwt kubernetes_host=$OPENSHIFT_HOST kubernetes_ca_cert=@/tmp/ca.crt
 ```
 
-## Policy Sample
+## Sample Policy
 
 ```
 vault policy write -tls-skip-verify policy-example policy/policy-example.hcl
@@ -86,13 +86,13 @@ vault write -tls-skip-verify auth/kubernetes/role/example \
     ttl=2h
 ```
 
-## Write sample data
+## Write Sample Data
 
 ```
 vault write -tls-skip-verify secret/example password=pwd
 ```
 
-## Test Client Vault
+## Test Vault Client
 
 ```
 oc new-project app
@@ -128,7 +128,7 @@ export VAULT_TOKEN=wLflBsnHbEfJSsKYIdLVLrnx
 vault read -tls-skip-verify secret/example
 ```
 
-# Agent Vault
+# Vault Agent
 
 ## Standalone
 
@@ -171,7 +171,7 @@ vault read -tls-skip-verify secret/example
 oc project app
 ```
 
-Using Agent Vault as sidecar container and  [Vault Agent Token Handler ](https://github.com/openlab-red/vault-agent-token-handler)
+Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-red/vault-agent-token-handler) as sidecar containers
 
 ### Spring Example
 
