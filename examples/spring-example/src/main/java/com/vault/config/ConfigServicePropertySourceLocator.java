@@ -17,7 +17,7 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -35,12 +35,16 @@ public class ConfigServicePropertySourceLocator implements PropertySourceLocator
         this.defaultProperties = defaultProperties;
     }
 
-    @Value("${vault.file:/var/run/secrets/vaultproject.io/application.yaml}")
-    private String path;
+    @Value("${vault.vaultPath:/var/run/secrets/vaultproject.io}")
+    private String vaultPath;
+
+    @Value("${vault.properties:application.yaml}")
+    private String vaultProperties;
 
     @Override
     public org.springframework.core.env.PropertySource<?> locate(
             org.springframework.core.env.Environment environment) {
+
         ConfigClientProperties properties = this.defaultProperties.override(environment);
         CompositePropertySource composite = new CompositePropertySource("configService");
 
@@ -122,18 +126,35 @@ public class ConfigServicePropertySourceLocator implements PropertySourceLocator
     }
 
     private Environment getEnvironment(
-            ConfigClientProperties properties, String label) throws IOException {
+            ConfigClientProperties properties, String label) throws Exception {
         String name = properties.getName();
         String profile = properties.getProfile();
-
         Environment result = new Environment(name, profile);
-
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-        File from = new File(path);
-        TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
-        };
-        result.add(new PropertySource(name, mapper.readValue(from, typeRef)));
-        return result;
+        Path directoryPath = FileSystems.getDefault().getPath(vaultPath);
+
+        WatchService watchService = FileSystems.getDefault().newWatchService();
+        directoryPath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
+
+        while (true) {
+            WatchKey watchKey = watchService.take();
+            for (final WatchEvent<?> event : watchKey.pollEvents()) {
+                WatchEvent.Kind<?> kind = event.kind();
+                if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE) || kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
+                    Path entry = (Path) event.context();
+                    if (vaultProperties.equalsIgnoreCase(entry.toString())) {
+                        File file = directoryPath.resolve(entry).toFile();
+                        if (file.exists()) {
+                            TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
+                            };
+                            result.add(new PropertySource(name, mapper.readValue(file, typeRef)));
+                            return result;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
