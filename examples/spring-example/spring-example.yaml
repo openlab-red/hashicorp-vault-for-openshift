@@ -68,6 +68,14 @@ spec:
         from:
           kind: ImageStreamTag
           name: 'spring-example:latest'
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - vault-agent-token-handler
+        from:
+          kind: ImageStreamTag
+          name: 'vault-agent-token-handler:latest'
   replicas: 1
   template:
     metadata:
