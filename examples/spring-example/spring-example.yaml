@@ -18,7 +18,6 @@ data:
 
             sink "file" {
                     type = "file"
-                    wrap_ttl = "1m"
                     config = {
                             path = "/var/run/secrets/vaultproject.io/token"
                     }
