@@ -147,15 +147,8 @@ oc exec $pod -- cat /var/run/secrets/vaultproject.io/token
 
 ```
 
-```json
-{
-  "token": "87kor7VqW7N4GZIAwnNWGijr",
-  "accessor": "4DJJ705wjJlhb6LeSwJZ9nHX",
-  "ttl": 60,
-  "creation_time": "2018-10-09T12:57:35.49025018Z",
-  "creation_path": "sys/wrapping/wrap",
-  "wrapped_accessor": ""
-}
+```
+87kor7VqW7N4GZIAwnNWGijr
 ```
 
 Read the secret:
@@ -175,7 +168,13 @@ Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-re
 
 ### Spring Example
 
-TBD
+```
+    oc create -f examples/spring-example/spring-example.yaml
+```
+
+> *Note*
+> Right now spring only read the properties file at bootstrap. 
+>
 
 ### Thorntail Example
 
