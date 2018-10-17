@@ -1,2 +1,2 @@
 logging.level.org.springframework: info
-spring.cloud.config.discovery.enabled: false
+spring.cloud.config.enabled: false
