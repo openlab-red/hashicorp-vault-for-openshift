@@ -169,16 +169,21 @@ Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-re
 ### Spring Example
 
 ```
+    oc new-build --name=spring-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/spring-example
     oc create -f examples/spring-example/spring-example.yaml
 ```
 
 > *Note*
+>
 > Right now spring only read the properties file at bootstrap. 
 >
 
 ### Thorntail Example
 
-TBD
+```
+    oc new-build --name=thorntail-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/thorntail-example
+    oc create -f examples/thorntail-example/thorntail-example.yaml
+```
 
 # References
 
