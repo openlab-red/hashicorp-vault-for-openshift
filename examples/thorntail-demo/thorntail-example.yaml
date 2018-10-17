@@ -18,7 +18,6 @@ data:
 
             sink "file" {
                     type = "file"
-                    wrap_ttl = "1m"
                     config = {
                             path = "/var/run/secrets/vaultproject.io/token"
                     }
@@ -102,16 +101,40 @@ spec:
           env:
           - name: SKIP_SETCAP
             value: 'true'
-          - name: "VAULT_ADDR"
-            value: "https://vault.hashicorp.svc:8200"
-          - name: "VAULT_CAPATH"
-            value: "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
+          - name: VAULT_ADDR
+            value: https://vault.hashicorp.svc:8200
+          - name: VAULT_CAPATH
+            value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
           volumeMounts:
           - mountPath: /vault/config/agent.config
             subPath: agent.config
             name: vault-config
           - mountPath: /var/run/secrets/vaultproject.io
             name: vault-agent-volume
+        - image: vault-agent-token-handler:latest
+          name: vault-agent-token-handler
+          args:
+            - handler
+          env:
+            - name: LOG_LEVEL
+              value: 'DEBUG'
+            - name: VAULT_ADDR
+              value: https://vault.hashicorp.svc:8200
+            - name: VAULT_CAPATH
+              value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+            - name: VAULT_TOKEN
+              value: /var/run/secrets/vaultproject.io/token
+            - name: VAULT_SECRET
+              value: secret/example
+            - name: PROPERTIES_FILE
+              value: /var/run/secrets/vaultproject.io/application.yaml
+          imagePullPolicy: Always
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /var/run/secrets/vaultproject.io
+              name: vault-agent-volume
       volumes:
       - name: vault-agent-volume
         emptyDir:
