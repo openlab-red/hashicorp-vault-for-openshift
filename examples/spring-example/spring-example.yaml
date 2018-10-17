@@ -132,7 +132,7 @@ spec:
               value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
             - name: VAULT_TOKEN
               value: /var/run/secrets/vaultproject.io/token
-            - name: RETRIEVE_SECRET
+            - name: VAULT_SECRET
               value: secret/example
             - name: PROPERTIES_FILE
               value: /var/run/secrets/vaultproject.io/application.yaml
