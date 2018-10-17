@@ -1,4 +1,4 @@
-package com.vault.vaultdemo.rest;
+package com.vault.demo.rest;
 
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;

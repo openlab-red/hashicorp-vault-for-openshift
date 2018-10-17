@@ -1,4 +1,4 @@
-package com.vault.vaultdemo.rest;
+package com.vault.demo.rest;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
