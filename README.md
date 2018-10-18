@@ -15,33 +15,20 @@ oc create -f ./vault/vault.yaml
 oc create route reencrypt vault --port=8200 --service=vault
 ```
 
-### With SDN Multi Tenant
+## Initialize Vault
 
-```
-oc adm  pod-network make-projects-global hashicorp-vault
-```
-
-### With SDN Network Policy
-
-TBD
-
-
-## Vault Operations and Configuration
-
-```
 export VAULT_ADDR=https://$(oc get route vault --no-headers -o custom-columns=HOST:.spec.host)
+echo $VAULT_ADDR
+vault operator init -tls-skip-verify -key-shares=1 -key-threshold=1
 
-vault init -tls-skip-verify -key-shares=1 -key-threshold=1
-```
-
-Sample output:
+Save the `Unseal Key 1` and the `Initial Root Token`:
 
 ```
 Unseal Key 1: NRvJGYdLeUc9emtX+eWJfa+JV7I0wzLb2lTlOcK5lmU=
 Initial Root Token: 4Zh3yRX5orXFqdQUXdKrNxmg
 ```
 
-Export as environment variables
+And export them as environment variables, for further use:
 
 ```
 export KEYS=NRvJGYdLeUc9emtX+eWJfa+JV7I0wzLb2lTlOcK5lmU=
@@ -49,13 +36,13 @@ export ROOT_TOKEN=4Zh3yRX5orXFqdQUXdKrNxmg
 export VAULT_TOKEN=$ROOT_TOKEN
 ```
 
-Unseal the vault
+## Unseal Vault
 
 ```
 vault operator unseal -tls-skip-verify $KEYS
 ```
 
-## Kubernetes Auth Configuration
+## Configure Kubernetes Auth with the Vault
 
 ```
 oc create sa vault-auth
@@ -92,6 +79,19 @@ vault write -tls-skip-verify auth/kubernetes/role/example \
 ```
 vault write -tls-skip-verify secret/example password=pwd
 ```
+
+## Expose Vault to Other OpenShift Projects/Client Applications
+
+### With SDN Multi Tenant
+
+```
+oc adm  pod-network make-projects-global hashicorp-vault
+```
+
+### With SDN Network Policy
+
+TODO
+
 
 ## Test Vault Client
 
