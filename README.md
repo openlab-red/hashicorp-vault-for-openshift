@@ -1,16 +1,17 @@
 # Vault
 
-## Prep and Deploy
+## Deploy Vault on OpenShift
 
 ```
 oc new-project hashicorp-vault
 
 oc adm policy add-scc-to-user privileged -z default
+oc get scc privileged -o yaml | grep system:serviceaccount:hashicorp-vault:default
 
-oc create configmap vault-config --from-file=vault-config=vault-config.json
+oc create configmap vault-config --from-file=vault-config=./vault/vault-config.json
+oc get cm vault-config -o yaml
 
-oc create -f vault.yaml
-
+oc create -f ./vault/vault.yaml
 oc create route reencrypt vault --port=8200 --service=vault
 ```
 
@@ -175,7 +176,7 @@ Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-re
 
 > *Note*
 >
-> Right now spring only read the properties file at bootstrap. 
+> Right now spring only read the properties file at bootstrap.
 >
 
 ### Thorntail Example
@@ -187,7 +188,7 @@ Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-re
 
 > *Note*
 >
-> Right now thorntail only read the properties file at bootstrap. 
+> Right now thorntail only read the properties file at bootstrap.
 >
 
 ### EAP Example
@@ -203,7 +204,7 @@ TBD
             -p CONTEXT_DIR=/examples/eap-example \
             -p SOURCE_REPOSITORY_REF=master
     ```
-    
+
 2. Enable Annotation Property Replacement
 
     ```
@@ -227,4 +228,3 @@ TBD
 * https://github.com/jboss-developer/jboss-eap-quickstarts
 * https://github.com/thorntail/thorntail-examples
 * https://github.com/spring-projects/spring-boot
-
