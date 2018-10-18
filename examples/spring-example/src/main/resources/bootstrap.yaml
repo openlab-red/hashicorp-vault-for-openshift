@@ -1,3 +1,2 @@
 spring.application.name: spring-example
-spring.cloud.config.enabled: false
 logging.level.org.springframework: info

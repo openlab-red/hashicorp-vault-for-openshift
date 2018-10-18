@@ -1,2 +1,1 @@
-# Bootstrap components
-org.springframework.cloud.bootstrap.BootstrapConfiguration=com.vault.config.ConfigServicePropertySourceLocator
+org.springframework.boot.env.EnvironmentPostProcessor=com.vault.config.SystemEnvironmentLocationPostProcessor
