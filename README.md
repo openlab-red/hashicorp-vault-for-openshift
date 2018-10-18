@@ -194,13 +194,22 @@ Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-re
 
 TBD
 
-```
-    oc new-app eap71-basic-s2i --name=eap-example \
-        -p APPLICATION_NAME=eap-example \
-        -p SOURCE_REPOSITORY_URL=https://github.com/openlab-red/hashicorp-vault-for-openshift \
-        -p CONTEXT_DIR=/examples/eap-example \
-        -p SOURCE_REPOSITORY_REF=master
-```
+1. Deploy EAP application
+
+    ```
+        oc new-appd --name=eap-example \
+            -p APPLICATION_NAME=eap-example \
+            -p SOURCE_REPOSITORY_URL=https://github.com/openlab-red/hashicorp-vault-for-openshift \
+            -p CONTEXT_DIR=/examples/eap-example \
+            -p SOURCE_REPOSITORY_REF=master
+    ```
+    
+2. Enable Annotation Property Replacement
+
+    ```
+        oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
+        oc volume dc/eap-example --add --name=jboss-cli -m /opt/eap/extensions -t configmap --configmap-name=jboss-cli --default-mode='0755' --overwrite
+    ```
 
 
 
