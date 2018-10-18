@@ -190,6 +190,12 @@ Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-re
 > Right now thorntail only read the properties file at bootstrap. 
 >
 
+### EAP Example
+
+TBD
+
+
+
 ## MutatingWebhookConfiguration
 
 TBD
@@ -201,4 +207,7 @@ TBD
 * https://github.com/raffaelespazzoli/credscontroller
 * https://blog.openshift.com/managing-secrets-openshift-vault-integration/
 * https://blog.openshift.com/vault-integration-using-kubernetes-authentication-method
+* https://github.com/jboss-developer/jboss-eap-quickstarts
+* https://github.com/thorntail/thorntail-examples
+* https://github.com/spring-projects/spring-boot
 
