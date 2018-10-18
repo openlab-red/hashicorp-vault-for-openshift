@@ -97,6 +97,9 @@ spec:
               port: 8080
             initialDelaySeconds: 60
             periodSeconds: 3
+          env:
+          - name: SPRING_CONFIG_LOCATION
+            value: /var/run/secrets/vaultproject.io/application.yaml
           volumeMounts:
           - mountPath: /var/run/secrets/vaultproject.io
             name: vault-agent-volume
