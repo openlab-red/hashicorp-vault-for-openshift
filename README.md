@@ -17,8 +17,10 @@ oc create route reencrypt vault --port=8200 --service=vault
 
 ## Initialize Vault
 
+```
 export VAULT_ADDR=https://$(oc get route vault --no-headers -o custom-columns=HOST:.spec.host)
 echo $VAULT_ADDR
+```
 vault operator init -tls-skip-verify -key-shares=1 -key-threshold=1
 
 Save the `Unseal Key 1` and the `Initial Root Token`:
