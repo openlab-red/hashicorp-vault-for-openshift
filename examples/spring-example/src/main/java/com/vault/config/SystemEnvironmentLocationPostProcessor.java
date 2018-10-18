@@ -7,11 +7,10 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
 import java.nio.file.*;
 import java.util.Map;
 
@@ -31,18 +30,18 @@ public class SystemEnvironmentLocationPostProcessor implements EnvironmentPostPr
         if (systemEnvironmentPropertySource.containsProperty(SPRING_CONFIG_LOCATION)) {
             String location = String.valueOf(systemEnvironmentPropertySource.getProperty(SPRING_CONFIG_LOCATION));
             if (!StringUtils.isEmpty(location)) {
-                ResourceLoader resourceLoader = new DefaultResourceLoader();
-                Resource resource = resourceLoader.getResource(location);
-                if (resource == null || !resource.exists()) {
-                    watchPath(resource);
+                location = location.replace(ResourceUtils.FILE_URL_PREFIX, "");
+                Path path = FileSystems.getDefault().getPath(location);
+                File file = path.toFile();
+                if (!file.exists()) {
+                    watchPath(path);
                 }
             }
         }
     }
 
-    private void watchPath(Resource resource) {
+    private void watchPath(Path path) {
         try {
-            Path path = resource.getFile().toPath();
             Path directoryPath = path.getParent();
 
             WatchService watchService = FileSystems.getDefault().newWatchService();
