@@ -87,13 +87,13 @@ spec:
           imagePullPolicy: Always
           livenessProbe:
             httpGet:
-              path: /health
+              path: /actuator/health
               port: 8080
             initialDelaySeconds: 60
             periodSeconds: 3
           readinessProbe:
             httpGet:
-              path: /health
+              path: /actuator/health
               port: 8080
             initialDelaySeconds: 60
             periodSeconds: 3
