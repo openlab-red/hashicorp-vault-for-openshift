@@ -194,6 +194,14 @@ Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-re
 
 TBD
 
+```
+    oc new-app eap71-basic-s2i --name=eap-example \
+        -p APPLICATION_NAME=eap-example \
+        -p SOURCE_REPOSITORY_URL=https://github.com/openlab-red/hashicorp-vault-for-openshift \
+        -p CONTEXT_DIR=/examples/eap-example \
+        -p SOURCE_REPOSITORY_REF=master
+```
+
 
 
 ## MutatingWebhookConfiguration
