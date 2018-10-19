@@ -1,4 +1,4 @@
-<module xmlns="urn:jboss:module:1.1" name="com.vault">
+<module xmlns="urn:jboss:module:1.1" name="vaultproject.io">
     <resources>
         <resource-root path="properties"/>
     </resources>
