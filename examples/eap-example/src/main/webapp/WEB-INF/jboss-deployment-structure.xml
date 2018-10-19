@@ -1,7 +1,7 @@
 <jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.2">
     <deployment>
         <dependencies>
-            <module name="com.vault" export="true"/>
+            <module name="vaultproject.io" export="true"/>
         </dependencies>
     </deployment>
 </jboss-deployment-structure>
