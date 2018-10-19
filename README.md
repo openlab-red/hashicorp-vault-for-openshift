@@ -207,14 +207,14 @@ TBD
             -p SOURCE_REPOSITORY_REF=master
     ```
 
-2. Enable Annotation Property Replacement
+2. Enable Annotation Property Replacement and Vault Module for properties
 
     ```
         oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
         oc volume dc/eap-example --add --name=jboss-cli -m /opt/eap/extensions -t configmap --configmap-name=jboss-cli --default-mode='0755' --overwrite
     ```
 
-
+3. 
 
 ## MutatingWebhookConfiguration
 
@@ -230,3 +230,4 @@ TBD
 * https://github.com/jboss-developer/jboss-eap-quickstarts
 * https://github.com/thorntail/thorntail-examples
 * https://github.com/spring-projects/spring-boot
+* https://dzone.com/articles/how-to-inject-property-file-properties-with-cdi
