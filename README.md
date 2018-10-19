@@ -1,46 +1,36 @@
 # Vault
 
-## Prep and Deploy
+## Deploy Vault on OpenShift
 
 ```
 oc new-project hashicorp-vault
 
 oc adm policy add-scc-to-user privileged -z default
+oc get scc privileged -o yaml | grep system:serviceaccount:hashicorp-vault:default
 
-oc create configmap vault-config --from-file=vault-config=vault-config.json
+oc create configmap vault-config --from-file=vault-config=./vault/vault-config.json
+oc get cm vault-config -o yaml
 
-oc create -f vault.yaml
-
+oc create -f ./vault/vault.yaml
 oc create route reencrypt vault --port=8200 --service=vault
 ```
 
-### With SDN Multi Tenant
-
-```
-oc adm  pod-network make-projects-global hashicorp-vault
-```
-
-### With SDN Network Policy
-
-TBD
-
-
-## Vault Operations and Configuration
+## Initialize Vault
 
 ```
 export VAULT_ADDR=https://$(oc get route vault --no-headers -o custom-columns=HOST:.spec.host)
-
-vault init -tls-skip-verify -key-shares=1 -key-threshold=1
+echo $VAULT_ADDR
 ```
+vault operator init -tls-skip-verify -key-shares=1 -key-threshold=1
 
-Sample output:
+Save the `Unseal Key 1` and the `Initial Root Token`:
 
 ```
 Unseal Key 1: NRvJGYdLeUc9emtX+eWJfa+JV7I0wzLb2lTlOcK5lmU=
 Initial Root Token: 4Zh3yRX5orXFqdQUXdKrNxmg
 ```
 
-Export as environment variables
+And export them as environment variables, for further use:
 
 ```
 export KEYS=NRvJGYdLeUc9emtX+eWJfa+JV7I0wzLb2lTlOcK5lmU=
@@ -48,13 +38,13 @@ export ROOT_TOKEN=4Zh3yRX5orXFqdQUXdKrNxmg
 export VAULT_TOKEN=$ROOT_TOKEN
 ```
 
-Unseal the vault
+## Unseal Vault
 
 ```
 vault operator unseal -tls-skip-verify $KEYS
 ```
 
-## Kubernetes Auth Configuration
+## Configure Kubernetes Auth with the Vault
 
 ```
 oc create sa vault-auth
@@ -91,6 +81,19 @@ vault write -tls-skip-verify auth/kubernetes/role/example \
 ```
 vault write -tls-skip-verify secret/example password=pwd
 ```
+
+## Expose Vault to Other OpenShift Projects/Client Applications
+
+### With SDN Multi Tenant
+
+```
+oc adm  pod-network make-projects-global hashicorp-vault
+```
+
+### With SDN Network Policy
+
+TODO
+
 
 ## Test Vault Client
 
@@ -175,7 +178,7 @@ Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-re
 
 > *Note*
 >
-> Right now spring only read the properties file at bootstrap. 
+> Right now spring only read the properties file at bootstrap.
 >
 
 ### Thorntail Example
@@ -187,7 +190,7 @@ Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-re
 
 > *Note*
 >
-> Right now thorntail only read the properties file at bootstrap. 
+> Right now thorntail only read the properties file at bootstrap.
 >
 
 ### EAP Example
@@ -203,7 +206,7 @@ TBD
             -p CONTEXT_DIR=/examples/eap-example \
             -p SOURCE_REPOSITORY_REF=master
     ```
-    
+
 2. Enable Annotation Property Replacement
 
     ```
@@ -227,4 +230,3 @@ TBD
 * https://github.com/jboss-developer/jboss-eap-quickstarts
 * https://github.com/thorntail/thorntail-examples
 * https://github.com/spring-projects/spring-boot
-
