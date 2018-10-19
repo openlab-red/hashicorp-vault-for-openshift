@@ -1,0 +1,5 @@
+<module xmlns="urn:jboss:module:1.1" name="com.vault">
+    <resources>
+        <resource-root path="properties"/>
+    </resources>
+</module>
