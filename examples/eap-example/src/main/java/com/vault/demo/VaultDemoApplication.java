@@ -12,11 +12,4 @@ import java.net.URL;
 @ApplicationPath("/")
 public class VaultDemoApplication extends Application {
 
-
-    @PostConstruct
-    public void post() {
-        final URL resource = Thread.currentThread().getContextClassLoader().getResource("application.properties");
-
-
-    }
 }
