@@ -1,0 +1,245 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-agent-config
+data:
+  vault-agent-config: |-
+    pid_file = "/var/run/secrets/vaultproject.io/pid"
+
+    auto_auth {
+            method "kubernetes"  {
+                    type = "kubernetes"
+                    mount_path = "auth/kubernetes"
+                    config = {
+                            role = "example"
+                            jwt = "@/var/run/secrets/kubernetes.io/serviceaccount/token"
+                    }
+            }
+
+            sink "file" {
+                    type = "file"
+                    config = {
+                            path = "/var/run/secrets/vaultproject.io/token"
+                    }
+            }
+    }
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: eap-example
+  name: eap-example
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: eap-example
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: eap-example
+  name: eap-example-ping
+spec:
+  ports:
+  - port: 8888
+    protocol: TCP
+    targetPort: 8888
+  selector:
+    app: eap-example
+---
+
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app: eap-example
+  name: eap-example
+spec:
+  to:
+    kind: Service
+    name: eap-example
+---
+
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: eap-example
+    application: eap-example
+    template: eap71-basic-s2i
+    xpaas: 1.4.12
+  name: eap-example
+  namespace: app
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    deploymentConfig: eap-example
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: eap-example
+        application: eap-example
+        deploymentConfig: eap-example
+      name: eap-example
+    spec:
+      containers:
+        - args:
+            - agent
+            - '-log-level=debug'
+            - '-config=/vault/config/agent.config'
+          env:
+            - name: SKIP_SETCAP
+              value: 'true'
+            - name: VAULT_ADDR
+              value: 'https://vault.hashicorp.svc:8200'
+            - name: VAULT_CAPATH
+              value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+          image: 'vault:latest'
+          imagePullPolicy: Always
+          name: vault-agent
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /vault/config/agent.config
+              name: vault-config
+              subPath: agent.config
+            - mountPath: /var/run/secrets/vaultproject.io
+              name: vault-agent-volume
+        - args:
+            - handler
+          env:
+            - name: LOG_LEVEL
+              value: DEBUG
+            - name: VAULT_ADDR
+              value: 'https://vault.hashicorp.svc:8200'
+            - name: VAULT_CAPATH
+              value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+            - name: VAULT_TOKEN
+              value: /var/run/secrets/vaultproject.io/token
+            - name: VAULT_SECRET
+              value: secret/example
+            - name: PROPERTIES_FILE
+              value: /var/run/secrets/vaultproject.io/application.json
+            - name: PROPERTIES_TYPE
+              value: json
+          image: vault-agent-token-handler
+          imagePullPolicy: Always
+          name: vault-agent-token-handler
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /var/run/secrets/vaultproject.io
+              name: vault-agent-volume
+        - env:
+            - name: JGROUPS_PING_PROTOCOL
+              value: openshift.DNS_PING
+            - name: OPENSHIFT_DNS_PING_SERVICE_NAME
+              value: eap-example-ping
+            - name: OPENSHIFT_DNS_PING_SERVICE_PORT
+              value: '8888'
+            - name: MQ_CLUSTER_PASSWORD
+              value: CQcrHBgO
+            - name: MQ_QUEUES
+            - name: MQ_TOPICS
+            - name: JGROUPS_CLUSTER_PASSWORD
+              value: 7YIqtE36
+            - name: AUTO_DEPLOY_EXPLODED
+              value: 'false'
+          image: eap-example
+          imagePullPolicy: Always
+          livenessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - '-c'
+                - /opt/eap/bin/livenessProbe.sh
+            failureThreshold: 3
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: eap-example
+          ports:
+            - containerPort: 8778
+              name: jolokia
+              protocol: TCP
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+            - containerPort: 8888
+              name: ping
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - '-c'
+                - /opt/eap/bin/readinessProbe.sh
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 1Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /opt/eap/extensions
+              name: jboss-cli
+            - mountPath: /var/run/secrets/vaultproject.io
+              name: vault-agent-volume
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 75
+      volumes:
+        - configMap:
+            defaultMode: 493
+            name: jboss-cli
+          name: jboss-cli
+        - emptyDir:
+            medium: Memory
+          name: vault-agent-volume
+        - configMap:
+            defaultMode: 420
+            items:
+              - key: vault-agent-config
+                path: agent.config
+            name: vault-agent-config
+          name: vault-config
+  triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - eap-example
+        from:
+          kind: ImageStreamTag
+          name: 'eap-example:latest'
+      type: ImageChange
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - vault-agent-token-handler
+        from:
+          kind: ImageStreamTag
+          name: 'vault-agent-token-handler:latest'
+      type: ImageChange

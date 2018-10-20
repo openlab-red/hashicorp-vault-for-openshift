@@ -195,26 +195,19 @@ Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-re
 
 ### EAP Example
 
-TBD
-
-1. Deploy EAP application
-
-    ```
-        oc new-appd --name=eap-example \
-            -p APPLICATION_NAME=eap-example \
-            -p SOURCE_REPOSITORY_URL=https://github.com/openlab-red/hashicorp-vault-for-openshift \
-            -p CONTEXT_DIR=/examples/eap-example \
-            -p SOURCE_REPOSITORY_REF=master
-    ```
-
-2. Enable Annotation Property Replacement and Vault Module for properties
+1. Enable Annotation Property Replacement and Vault Module for properties
 
     ```
         oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
         oc volume dc/eap-example --add --name=jboss-cli -m /opt/eap/extensions -t configmap --configmap-name=jboss-cli --default-mode='0755' --overwrite
     ```
 
-3. 
+2. Deploy EAP application
+
+    ```     
+        oc new-build --name=eap-example2 registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
+        oc create -f examples/eap-example/eap-example.yaml
+    ``` 
 
 ## MutatingWebhookConfiguration
 
