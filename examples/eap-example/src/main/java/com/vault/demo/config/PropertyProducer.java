@@ -48,7 +48,7 @@ public class PropertyProducer {
     @PostConstruct
     public void init() throws IOException, InterruptedException {
         this.properties = System.getProperties();
-        final String key = "application.properties";
+        final String key = "application";
         final String location = this.properties.getProperty(key);
         Path path = FileSystems.getDefault().getPath(location);
         File file = path.toFile();
