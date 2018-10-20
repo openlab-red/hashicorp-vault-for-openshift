@@ -1,9 +1,14 @@
 batch
 
 embed-server --server-config=standalone-openshift.xml
+
 /subsystem=ee:write-attribute(name=annotation-property-replacement,value=true)
+
 /subsystem=ee:write-attribute(name=jboss-descriptor-property-replacement,value=true)
+
 /subsystem=ee:write-attribute(name=global-modules, value=[{"name"=>"vaultproject.io","slot"=>"main"}])
+
+/system-property=application.properties:add(value=/var/run/secrets/vaultproject.io/application.properties)
 
 run-batch
 

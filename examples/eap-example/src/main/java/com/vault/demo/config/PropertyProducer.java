@@ -5,9 +5,11 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.*;
 import java.util.Properties;
 
 @Singleton
@@ -37,17 +39,41 @@ public class PropertyProducer {
         final Property annotation = ip.getAnnotated().getAnnotation(Property.class);
 
         return ip.getAnnotated().isAnnotationPresent(Property.class)
-                && !(annotation.value().length() == 0) ?
+                && !annotation.value().isEmpty() ?
                 annotation.value() : ip.getMember().getName();
 
 
     }
 
     @PostConstruct
-    public void init() throws IOException {
+    public void init() throws IOException, InterruptedException {
         this.properties = System.getProperties();
-        final InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("application.properties");
-        this.properties.load(stream);
+        final String key = "application.properties";
+        final String location = this.properties.getProperty(key);
+        Path path = FileSystems.getDefault().getPath(location);
+        File file = path.toFile();
+        if (!file.exists()) {
+            watchPath(path);
+        }
+        this.properties.load(Files.newInputStream(path));
 
+    }
+
+    private void watchPath(Path path) throws IOException, InterruptedException {
+        Path directoryPath = path.getParent();
+
+        WatchService watchService = FileSystems.getDefault().newWatchService();
+        directoryPath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
+                StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
+
+        WatchKey watchKey = watchService.take();
+        while (true) {
+            for (final WatchEvent<?> event : watchKey.pollEvents()) {
+                Path entry = (Path) event.context();
+                if (path.toFile().getName().equalsIgnoreCase(entry.toString())) {
+                    return;
+                }
+            }
+        }
     }
 }

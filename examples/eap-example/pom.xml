@@ -11,7 +11,8 @@
     <properties>
         <jboss.home.name>EAP7_HOME</jboss.home.name>
         <product.name>JBoss EAP</product.name>
-
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <version.wildfly.maven.plugin>1.2.1.Final</version.wildfly.maven.plugin>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
