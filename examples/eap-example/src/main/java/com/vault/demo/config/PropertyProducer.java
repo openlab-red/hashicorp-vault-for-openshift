@@ -1,5 +1,9 @@
 package com.vault.demo.config;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
+
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -10,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 @Singleton
@@ -50,12 +56,19 @@ public class PropertyProducer {
         this.properties = System.getProperties();
         final String key = "application";
         final String location = this.properties.getProperty(key);
+        final ObjectMapper objectMapper = new ObjectMapper();
+
+
         Path path = FileSystems.getDefault().getPath(location);
         File file = path.toFile();
         if (!file.exists()) {
             watchPath(path);
         }
-        this.properties.load(Files.newInputStream(path));
+
+        byte[] data = Files.readAllBytes(path);
+        Map<String, String> map = objectMapper.readValue(data, new TypeReference<HashMap<String,String>>() {});
+
+        this.properties.putAll(map);
 
     }
 
