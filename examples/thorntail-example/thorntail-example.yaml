@@ -71,10 +71,11 @@ spec:
       imageChangeParams:
         automatic: true
         containerNames:
-          - vault-agent-token-handler
+          - vault-secret-fetcher
         from:
           kind: ImageStreamTag
-          name: 'vault-agent-token-handler:latest'
+          name: 'vault-secret-fetcher:latest'
+          namespace: openshift
   replicas: 1
   template:
     metadata:
@@ -114,7 +115,7 @@ spec:
           - name: SKIP_SETCAP
             value: 'true'
           - name: VAULT_ADDR
-            value: https://vault.hashicorp.svc:8200
+            value: https://vault.hashicorp-vault.svc:8200
           - name: VAULT_CAPATH
             value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
           volumeMounts:
@@ -123,15 +124,15 @@ spec:
             name: vault-config
           - mountPath: /var/run/secrets/vaultproject.io
             name: vault-agent-volume
-        - image: vault-agent-token-handler:latest
-          name: vault-agent-token-handler
+        - image: vault-secret-fetcher:latest
+          name: vault-secret-fetcher
           args:
-            - handler
+            - start
           env:
             - name: LOG_LEVEL
               value: 'DEBUG'
             - name: VAULT_ADDR
-              value: https://vault.hashicorp.svc:8200
+              value: https://vault.hashicorp-vault.svc:8200
             - name: VAULT_CAPATH
               value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
             - name: VAULT_TOKEN

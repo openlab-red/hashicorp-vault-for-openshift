@@ -168,7 +168,7 @@ vault read -tls-skip-verify secret/example
 oc project app
 ```
 
-Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-red/vault-agent-token-handler) as sidecar containers
+Using Agent Vault and [Vault Secret Fetcher ](https://github.com/openlab-red/vault-secret-fetcher) as sidecar containers
 
 ### Spring Example
 
@@ -199,20 +199,18 @@ Using Agent Vault and [Vault Agent Token Handler ](https://github.com/openlab-re
 1. Enable Annotation Property Replacement and Vault Module for properties
 
     ```
+        cd examples/eap-example
         oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
-        oc volume dc/eap-example --add --name=jboss-cli -m /opt/eap/extensions -t configmap --configmap-name=jboss-cli --default-mode='0755' --overwrite
     ```
 
 2. Deploy EAP application
 
     ```     
-        oc new-build --name=eap-example2 registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
+        oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
         oc create -f examples/eap-example/eap-example.yaml
     ``` 
 
-## MutatingWebhookConfiguration
-
-TBD
+## Mutating Webhook Configuration
 
 [Mutating Webhook Configuration ](https://github.com/openlab-red/mutating-webhook-vault-agent)
 
