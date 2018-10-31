@@ -49,7 +49,7 @@ vault operator unseal -tls-skip-verify $KEYS
 
 ```
 oc create sa vault-auth
-oc adm policy add-cluster-role-to-user system:auth-delegator system:serviceaccount:hashicorp:vault-auth
+oc adm policy add-cluster-role-to-user system:auth-delegator system:serviceaccount:hashicorp-vault:vault-auth
 reviewer_service_account_jwt=$(oc serviceaccounts get-token vault-auth)
 
 pod=$(oc get pods -lapp=vault --no-headers -o custom-columns=NAME:.metadata.name)
