@@ -52,23 +52,28 @@ public class PropertyProducer {
     }
 
     @PostConstruct
-    public void init() throws IOException, InterruptedException {
+    public void init() {
         this.properties = System.getProperties();
         final String key = "application";
         final String location = this.properties.getProperty(key);
         final ObjectMapper objectMapper = new ObjectMapper();
 
+        try {
 
-        Path path = FileSystems.getDefault().getPath(location);
-        File file = path.toFile();
-        if (!file.exists()) {
-            watchPath(path);
+            Path path = FileSystems.getDefault().getPath(location);
+            File file = path.toFile();
+            if (!file.exists()) {
+                watchPath(path);
+            }
+
+            byte[] data = Files.readAllBytes(path);
+            Map<String, String> map = objectMapper.readValue(data, new TypeReference<HashMap<String, String>>() {
+            });
+
+            this.properties.putAll(map);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-
-        byte[] data = Files.readAllBytes(path);
-        Map<String, String> map = objectMapper.readValue(data, new TypeReference<HashMap<String,String>>() {});
-
-        this.properties.putAll(map);
 
     }
 

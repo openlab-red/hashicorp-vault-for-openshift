@@ -162,43 +162,43 @@ export VAULT_TOKEN=87kor7VqW7N4GZIAwnNWGijr
 vault read -tls-skip-verify secret/example
 ```
 
-## Side Container
+## Manual Sidecar Container
 
-```
-oc project app
-```
+Using **Agent Vault** and **Vault Secret Fetcher** as sidecar containers
 
-Using Agent Vault and [Vault Secret Fetcher ](https://github.com/openlab-red/vault-secret-fetcher) as sidecar containers
+Follow the instruction from [Vault Secret Fetcher ](https://github.com/openlab-red/vault-secret-fetcher) to publish the vault secret fetcher image in OpenShift.
+
+
+> **Note**
+>
+> Right now all the examples only read the properties file at bootstrap.
+>
 
 ### Spring Example
 
 ```
+    oc project app
+
     oc new-build --name=spring-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/spring-example
     oc create -f examples/spring-example/spring-example.yaml
 ```
 
-> *Note*
->
-> Right now spring only read the properties file at bootstrap.
->
-
 ### Thorntail Example
 
 ```
+    oc project app
+
     oc new-build --name=thorntail-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/thorntail-example
     oc create -f examples/thorntail-example/thorntail-example.yaml
 ```
-
-> *Note*
->
-> Right now thorntail only read the properties file at bootstrap.
->
 
 ### EAP Example
 
 1. Enable Annotation Property Replacement and Vault Module for properties
 
     ```
+        oc project app
+
         cd examples/eap-example
         oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
     ```
@@ -212,7 +212,52 @@ Using Agent Vault and [Vault Secret Fetcher ](https://github.com/openlab-red/vau
 
 ## Mutating Webhook Configuration
 
-[Mutating Webhook Configuration ](https://github.com/openlab-red/mutating-webhook-vault-agent)
+1. Configure Mutating WebHook
+
+    Follow the setup instruction from [Mutating Webhook Configuration ](https://github.com/openlab-red/mutating-webhook-vault-agent)
+
+2. Enable the vault webhook for the **app** project
+
+    ```
+    oc label namespace app vault-agent-webhook=enabled
+    ```
+        
+### Spring Example
+
+```
+oc project app
+
+oc new-build --name=spring-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/spring-example
+oc create -f examples/spring-example/spring-inject.yaml
+```
+
+
+
+### Thorntail Example
+
+```
+oc project app
+
+oc new-build --name=thorntail-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/thorntail-example
+oc create -f examples/thorntail-example/thorntail-inject.yaml
+```
+
+### EAP Example
+
+
+1. Enable Annotation Property Replacement and Vault Module for properties
+
+    ```
+        cd examples/eap-example
+        oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
+    ```
+
+2. Deploy EAP application
+
+    ```     
+        oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
+        oc create -f examples/eap-example/eap-inject.yaml
+    ``` 
 
 # References
 
