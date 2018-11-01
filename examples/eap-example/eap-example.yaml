@@ -135,8 +135,6 @@ spec:
               value: secret/example
             - name: PROPERTIES_FILE
               value: /var/run/secrets/vaultproject.io/application.json
-            - name: PROPERTIES_TYPE
-              value: json
           image: vault-secret-fetcher
           imagePullPolicy: Always
           name: vault-secret-fetcher
