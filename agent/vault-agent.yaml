@@ -39,7 +39,7 @@ spec:
         - name: SKIP_SETCAP
           value: 'true'
         - name: "VAULT_ADDR"
-          value: "https://vault.hashicorp.svc:8200"
+          value: "https://vault.hashicorp-vault.svc:8200"
         - name: "VAULT_CAPATH"
           value: "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
         volumeMounts:

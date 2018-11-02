@@ -101,7 +101,7 @@ TODO
 ```
 oc new-project app
 
-default_account_token=$(oc sa get-token default)
+default_account_token=$(oc sa get-token default -n app)
 vault write -tls-skip-verify auth/kubernetes/login role=example jwt=${default_account_token}
 
 ```
@@ -132,6 +132,135 @@ export VAULT_TOKEN=wLflBsnHbEfJSsKYIdLVLrnx
 vault read -tls-skip-verify secret/example
 ```
 
+## Vault Database secret
+
+### Deploy postgresql
+
+```
+oc new-app postgresql-persistent \
+    --name=postgresql -lname=postgresql  \
+    --param DATABASE_SERVICE_NAME=postgresql --param POSTGRESQL_DATABASE=sampledb \
+    --param POSTGRESQL_USER=user --param POSTGRESQL_PASSWORD=redhat \
+    --param VOLUME_CAPACITY=1Gi \
+    --env POSTGRESQL_ADMIN_PASSWORD=postgres 
+```
+
+### Enable datatabase secret in vault
+
+```
+vault secrets enable database
+```
+
+### Install postgresql plugin
+
+```
+vault write -tls-skip-verify database/config/postgresql \
+    plugin_name=postgresql-database-plugin \
+    allowed_roles="pg-readwrite" \
+    connection_url="postgresql://{{username}}:{{password}}@postgresql.hashicorp-vault.svc:5432/sampledb?sslmode=disable" \
+    username="postgres" \
+    password="postgresql" 
+```
+
+### Role mapping
+
+```
+
+vault write database/roles/pg-readwrite \
+    db_name=postgresql \
+    creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
+        GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
+    default_ttl="1h" \
+    max_ttl="24h"
+
+```
+    
+### Sample Policy
+
+```
+vault policy write pg-readwrite policy/policy-database.hcl 
+```
+
+
+### Authorisation
+
+```
+vault write auth/kubernetes/role/pg-readwrite \
+    bound_service_account_names=default bound_service_account_namespaces='app' \
+    policies=pg-readwrite \
+    ttl=2h 
+```
+
+
+### Read credentials
+
+```
+vault read database/creds/pg-readwrite
+
+```
+
+Sample output:
+```
+Key                Value
+---                -----
+lease_id           database/creds/pg-readwrite/2R94Xr0qfA6JNeWSx5O2I375
+lease_duration     1h
+lease_renewable    true
+password           A1a-Sx82lF4AET6khzbj
+username           v-root-pg-readw-57OZENOr1AYEhqt3n4xY-1541144444
+```
+
+Verify as well in Postgresql
+
+```
+sh-4.2$ psql
+psql (9.6.10)
+Type "help" for help.
+
+postgres=# \du
+                                                      List of roles
+                    Role name                    |                         Attributes                         | Member of
+-------------------------------------------------+------------------------------------------------------------+-----------
+ postgres                                        | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+ v-root-pg-readw-57OZENOr1AYEhqt3n4xY-1541144444 | Password valid until 2018-11-02 08:40:49+00                | {}
+```
+
+### Test Vault Client
+
+```
+oc project app
+
+default_account_token=$(oc sa get-token default -n app)
+vault write  auth/kubernetes/login role=pg-readwrite jwt=${default_account_token}
+
+```
+
+Sample Output:
+
+```
+Key                                       Value
+---                                       -----
+token                                     418R4AnbyUKNWEPR8uTbUQyR
+token_accessor                            WopxlNqCAQdcid0MlhYBtDFB
+token_duration                            2h
+token_renewable                           true
+token_policies                            ["default" "pg-readwrite"]
+identity_policies                         []
+policies                                  ["default" "pg-readwrite"]
+token_meta_service_account_name           default
+token_meta_service_account_namespace      app
+token_meta_service_account_secret_name    default-token-t265w
+token_meta_service_account_uid            0aea2a8e-db8f-11e8-b25a-026c5425dd64
+token_meta_role                           pg-readwrite
+```
+
+Read the secret:
+
+```
+export VAULT_TOKEN=418R4AnbyUKNWEPR8uTbUQyR
+vault read database/creds/pg-readwrite
+```
+
 # Vault Agent
 
 ## Standalone
@@ -148,7 +277,6 @@ Find token under */var/run/secrets/vaultproject.io/token*
 ```
 pod=$(oc get pods -lapp=vault-agent --no-headers -o custom-columns=NAME:.metadata.name)
 oc exec $pod -- cat /var/run/secrets/vaultproject.io/token
-
 ```
 
 ```
