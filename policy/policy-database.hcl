@@ -3,3 +3,6 @@
 path "database/creds/pg-readwrite" {
   capabilities = ["read"]
 }
+path "secret/example" {
+  capabilities = ["read", "list"]
+}

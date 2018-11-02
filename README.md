@@ -177,6 +177,8 @@ vault write database/roles/pg-readwrite \
     
 ### Sample Policy
 
+The policy contains both secret/example path and database/creds/pg-readwrite
+
 ```
 vault policy write pg-readwrite policy/policy-database.hcl 
 ```
@@ -185,7 +187,7 @@ vault policy write pg-readwrite policy/policy-database.hcl
 ### Authorisation
 
 ```
-vault write auth/kubernetes/role/pg-readwrite \
+vault write auth/kubernetes/role/example \
     bound_service_account_names=default bound_service_account_namespaces='app' \
     policies=pg-readwrite \
     ttl=2h 
@@ -259,6 +261,7 @@ Read the secret:
 ```
 export VAULT_TOKEN=418R4AnbyUKNWEPR8uTbUQyR
 vault read database/creds/pg-readwrite
+vault read -tls-skip-verify secret/example
 ```
 
 # Vault Agent
