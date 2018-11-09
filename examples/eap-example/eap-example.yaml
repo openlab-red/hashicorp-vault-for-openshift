@@ -135,7 +135,7 @@ spec:
               value: secret/example
             - name: PROPERTIES_FILE
               value: /var/run/secrets/vaultproject.io/application.json
-          image: vault-secret-fetcher
+          image: openlabred/vault-secret-fetcher:v1.0.0
           imagePullPolicy: Always
           name: vault-secret-fetcher
           resources: {}
@@ -233,12 +233,3 @@ spec:
           name: 'eap-example:latest'
       type: ImageChange
     - type: ConfigChange
-    - imageChangeParams:
-        automatic: true
-        containerNames:
-          - vault-secret-fetcher
-        from:
-          kind: ImageStreamTag
-          name: 'vault-secret-fetcher:latest'
-          namespace: openshift
-      type: ImageChange

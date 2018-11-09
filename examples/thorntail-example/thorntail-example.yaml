@@ -67,15 +67,6 @@ spec:
         from:
           kind: ImageStreamTag
           name: 'thorntail-example:latest'
-    - type: ImageChange
-      imageChangeParams:
-        automatic: true
-        containerNames:
-          - vault-secret-fetcher
-        from:
-          kind: ImageStreamTag
-          name: 'vault-secret-fetcher:latest'
-          namespace: openshift
   replicas: 1
   template:
     metadata:
@@ -124,7 +115,7 @@ spec:
             name: vault-config
           - mountPath: /var/run/secrets/vaultproject.io
             name: vault-agent-volume
-        - image: vault-secret-fetcher:latest
+        - image: openlabred/vault-secret-fetcher:v1.0.0
           name: vault-secret-fetcher
           args:
             - start
