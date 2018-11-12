@@ -101,9 +101,7 @@ metadata:
 spec:
   ingress:
   - from:
-    - namespaceSelector:
-        matchLabels:
-          project: app
+    - namespaceSelector: {}
     ports:
     - port: 8200
       protocol: TCP
