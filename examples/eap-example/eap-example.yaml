@@ -76,7 +76,6 @@ metadata:
     template: eap71-basic-s2i
     xpaas: 1.4.12
   name: eap-example
-  namespace: app
 spec:
   replicas: 1
   revisionHistoryLimit: 10
