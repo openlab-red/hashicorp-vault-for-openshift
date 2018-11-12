@@ -93,7 +93,30 @@ oc adm  pod-network make-projects-global hashicorp-vault
 
 ### With SDN Network Policy
 
-TODO
+```yml
+apiVersion: extensions/v1beta1
+kind: NetworkPolicy
+metadata:
+  name: allow-vault
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          project: app
+    ports:
+    - port: 8200
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: vault
+  policyTypes:
+  - Ingress
+```
+
+```
+oc apply -f vault/app-allow-vault.yaml
+```
 
 
 ## Test Vault Client
