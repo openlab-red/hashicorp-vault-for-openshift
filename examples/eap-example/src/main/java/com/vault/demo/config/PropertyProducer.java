@@ -1,8 +1,6 @@
 package com.vault.demo.config;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
+import org.yaml.snakeyaml.Yaml;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
@@ -11,10 +9,8 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.*;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -56,7 +52,6 @@ public class PropertyProducer {
         this.properties = System.getProperties();
         final String key = "application";
         final String location = this.properties.getProperty(key);
-        final ObjectMapper objectMapper = new ObjectMapper();
 
         try {
 
@@ -66,13 +61,28 @@ public class PropertyProducer {
                 watchPath(path);
             }
 
-            byte[] data = Files.readAllBytes(path);
-            Map<String, Object> map = objectMapper.readValue(data, new TypeReference<HashMap<String, String>>() {
+
+            Yaml yaml = new Yaml();
+            Map<String, LinkedHashMap> data = yaml.load(Files.newInputStream(path));
+
+            data.forEach((k, v) -> {
+                navigate(new StringBuilder(k), v, properties);
             });
 
-            this.properties.putAll(map);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+
+    }
+
+    private void navigate(StringBuilder sb, LinkedHashMap<String, ?> map, Properties properties) {
+        for (Map.Entry<String, ?> entry : map.entrySet()) {
+            sb.append(".").append(entry.getKey());
+            if (entry.getValue().getClass().equals(String.class)) {
+                properties.put(sb.toString(), String.valueOf(entry.getValue()));
+            } else {
+                navigate(sb, (LinkedHashMap<String, ?>) entry.getValue(), properties);
+            }
         }
 
     }
