@@ -11,7 +11,7 @@ public class SecretController {
 	
 	private Log log = LogFactory.getLog(SecretController.class);
 
-	@Value("${password:undefined}")
+	@Value("${secret.example.password:undefined}")
 	String password;
 
 	@RequestMapping("/secret")

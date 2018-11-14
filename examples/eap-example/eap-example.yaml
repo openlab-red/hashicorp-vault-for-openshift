@@ -134,7 +134,7 @@ spec:
               value: secret/example
             - name: PROPERTIES_FILE
               value: /var/run/secrets/vaultproject.io/application.json
-          image: openlabred/vault-secret-fetcher:v1.0.0
+          image: openlabred/vault-secret-fetcher:v1.0.1
           imagePullPolicy: Always
           name: vault-secret-fetcher
           resources: {}

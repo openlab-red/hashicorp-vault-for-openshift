@@ -114,7 +114,7 @@ spec:
             name: vault-config
           - mountPath: /var/run/secrets/vaultproject.io
             name: vault-agent-volume
-        - image: openlabred/vault-secret-fetcher:v1.0.0
+        - image: openlabred/vault-secret-fetcher:v1.0.1
           name: vault-secret-fetcher
           args:
             - start
