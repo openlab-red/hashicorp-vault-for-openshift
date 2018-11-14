@@ -169,7 +169,7 @@ oc new-app postgresql-persistent \
 ### Enable datatabase secret in vault
 
 ```
-vault secrets enable database
+vault secrets enable -tls-skip-verify database
 ```
 
 ### Install postgresql plugin
@@ -180,14 +180,14 @@ vault write -tls-skip-verify database/config/postgresql \
     allowed_roles="pg-readwrite" \
     connection_url="postgresql://{{username}}:{{password}}@postgresql.hashicorp-vault.svc:5432/sampledb?sslmode=disable" \
     username="postgres" \
-    password="postgresql" 
+    password="postgres" 
 ```
 
 ### Role mapping
 
 ```
 
-vault write database/roles/pg-readwrite \
+vault write -tls-skip-verify database/roles/pg-readwrite \
     db_name=postgresql \
     creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
         GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
@@ -201,14 +201,14 @@ vault write database/roles/pg-readwrite \
 The policy contains both secret/example path and database/creds/pg-readwrite
 
 ```
-vault policy write pg-readwrite policy/policy-database.hcl 
+vault policy write -tls-skip-verify pg-readwrite policy/policy-database.hcl 
 ```
 
 
 ### Authorisation
 
 ```
-vault write auth/kubernetes/role/example \
+vault write -tls-skip-verify auth/kubernetes/role/example \
     bound_service_account_names=default bound_service_account_namespaces='app' \
     policies=pg-readwrite \
     ttl=2h 
@@ -218,7 +218,7 @@ vault write auth/kubernetes/role/example \
 ### Read credentials
 
 ```
-vault read database/creds/pg-readwrite
+vault read -tls-skip-verify database/creds/pg-readwrite
 
 ```
 
@@ -254,7 +254,7 @@ postgres=# \du
 oc project app
 
 default_account_token=$(oc sa get-token default -n app)
-vault write  auth/kubernetes/login role=pg-readwrite jwt=${default_account_token}
+vault write -tls-skip-verify auth/kubernetes/login role=pg-readwrite jwt=${default_account_token}
 
 ```
 
@@ -281,7 +281,7 @@ Read the secret:
 
 ```
 export VAULT_TOKEN=418R4AnbyUKNWEPR8uTbUQyR
-vault read database/creds/pg-readwrite
+vault read -tls-skip-verify database/creds/pg-readwrite
 vault read -tls-skip-verify secret/example
 ```
 
