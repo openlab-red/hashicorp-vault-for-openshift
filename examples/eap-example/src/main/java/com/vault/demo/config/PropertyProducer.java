@@ -67,7 +67,7 @@ public class PropertyProducer {
             }
 
             byte[] data = Files.readAllBytes(path);
-            Map<String, String> map = objectMapper.readValue(data, new TypeReference<HashMap<String, String>>() {
+            Map<String, Object> map = objectMapper.readValue(data, new TypeReference<HashMap<String, String>>() {
             });
 
             this.properties.putAll(map);
