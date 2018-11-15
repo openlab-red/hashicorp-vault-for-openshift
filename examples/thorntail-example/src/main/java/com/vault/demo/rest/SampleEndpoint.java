@@ -11,7 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 @ApplicationScoped
-@Path("/sample")
+@Path("/samples")
 public class SampleEndpoint {
 
 
