@@ -190,7 +190,7 @@ vault write -tls-skip-verify database/config/postgresql \
 vault write -tls-skip-verify database/roles/pg-readwrite \
     db_name=postgresql \
     creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
-        GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
+        GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
     default_ttl="1h" \
     max_ttl="24h"
 
