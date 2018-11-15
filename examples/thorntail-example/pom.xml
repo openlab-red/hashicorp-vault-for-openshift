@@ -1,71 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.vault</groupId>
-  <artifactId>vault-demo</artifactId>
-  <name>Vault Example</name>
-  <version>1.0.0-SNAPSHOT</version>
-  <packaging>war</packaging>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.vault</groupId>
+    <artifactId>vault-demo</artifactId>
+    <name>Vault Example</name>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>war</packaging>
 
-  <properties>
-    <version.thorntail>2.2.0.Final</version.thorntail>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-    <failOnMissingWebXml>false</failOnMissingWebXml>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+    <properties>
+        <version.thorntail>2.2.0.Final</version.thorntail>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <failOnMissingWebXml>false</failOnMissingWebXml>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.h2>1.4.187</version.h2>
+        <version.postgresql>42.2.2.redhat-2</version.postgresql>
+    </properties>
 
-  <dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.thorntail</groupId>
+                <artifactId>bom-all</artifactId>
+                <version>${version.thorntail}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <finalName>vault-demo</finalName>
+        <plugins>
+            <plugin>
+                <groupId>io.thorntail</groupId>
+                <artifactId>thorntail-maven-plugin</artifactId>
+                <version>${version.thorntail}</version>
+                <configuration>
+                    <mainClass>com.vault.demo.config.Main</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>package</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
-      <dependency>
-        <groupId>io.thorntail</groupId>
-        <artifactId>bom-all</artifactId>
-        <version>${version.thorntail}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
+
+        <dependency>
+            <groupId>io.thorntail</groupId>
+            <artifactId>jaxrs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.thorntail</groupId>
+            <artifactId>microprofile-health</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.thorntail</groupId>
+            <artifactId>cdi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.thorntail</groupId>
+            <artifactId>jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.thorntail</groupId>
+            <artifactId>datasources</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${version.h2}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${version.postgresql}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.thorntail</groupId>
+            <artifactId>arquillian</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-  </dependencyManagement>
-
-  <build>
-    <finalName>vault-demo</finalName>
-    <plugins>
-      <plugin>
-        <groupId>io.thorntail</groupId>
-        <artifactId>thorntail-maven-plugin</artifactId>
-        <version>${version.thorntail}</version>
-        <configuration>
-          <mainClass>com.vault.demo.config.Main</mainClass>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>package</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
-
-  <dependencies>
-    
-    <dependency>
-      <groupId>io.thorntail</groupId>
-      <artifactId>jaxrs</artifactId>
-    </dependency><dependency>
-      <groupId>io.thorntail</groupId>
-      <artifactId>microprofile-health</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.thorntail</groupId>
-      <artifactId>cdi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.thorntail</groupId>
-      <artifactId>arquillian</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
 </project>
