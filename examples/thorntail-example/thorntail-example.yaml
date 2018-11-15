@@ -75,7 +75,7 @@ spec:
     spec:
       containers:
         - args:
-            - '-s/var/run/secrets/vaultproject.io/application.yaml'
+            - '-s/var/run/secrets/vaultproject.io/application.yaml -Spostgres'
           command:
             - /opt/run-java/run-java.sh
           name: thorntail-example

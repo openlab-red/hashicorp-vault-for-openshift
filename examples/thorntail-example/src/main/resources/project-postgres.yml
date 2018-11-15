@@ -1,0 +1,13 @@
+swarm:
+  datasources:
+    jdbc-drivers:
+      org.postgresql:
+        driver-class-name: org.postgresql.Driver
+        xa-datasource-class-name: org.postgresql.xa.PGXADataSource
+        driver-module-name: org.postgresql
+    data-sources:
+      sampledb:
+        driver-name: org.postgresql
+        connection-url: jdbc:postgresql://postgresql:5432/sampledb
+        user-name: ${database.creds.pg-readwrite.username}
+        password: ${database.creds.pg-readwrite.password}

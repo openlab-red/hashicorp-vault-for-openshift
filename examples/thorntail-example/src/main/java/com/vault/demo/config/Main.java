@@ -5,8 +5,10 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.wildfly.swarm.Swarm;
 import org.wildfly.swarm.cdi.CDIFraction;
 import org.wildfly.swarm.cli.CommandLine;
+import org.wildfly.swarm.datasources.DatasourcesFraction;
 import org.wildfly.swarm.jaxrs.JAXRSArchive;
 import org.wildfly.swarm.jaxrs.JAXRSFraction;
+import org.wildfly.swarm.jpa.JPAFraction;
 import org.wildfly.swarm.microprofile.health.HealthFraction;
 
 import java.io.File;
@@ -35,6 +37,8 @@ public class Main {
                 .fraction(new CDIFraction())
                 .fraction(new HealthFraction())
                 .fraction(new JAXRSFraction())
+                .fraction(new DatasourcesFraction())
+                .fraction(new JPAFraction())
                 .start()
                 .deploy();
 
