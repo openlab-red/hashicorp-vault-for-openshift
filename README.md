@@ -358,8 +358,8 @@ Follow the instruction from [Vault Secret Fetcher ](https://github.com/openlab-r
 2. Deploy EAP application
 
     ```     
-        oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
-        oc create -f eap-example.yaml
+       oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=vault.cli=extensions/vault.cli --from-file=postgresql.cli=extensions/postgresql.cli
+       oc create -f eap-example.yaml
     ``` 
 
 ## Mutating Webhook Configuration
@@ -401,7 +401,7 @@ oc create -f examples/thorntail-example/thorntail-inject.yaml
 
     ```
         cd examples/eap-example
-        oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
+        oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=vault.cli=extensions/vault.cli --from-file=postgresql.cli=extensions/postgresql.cli
     ```
 
 2. Deploy EAP application
