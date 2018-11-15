@@ -69,6 +69,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.19</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -105,16 +110,15 @@
         </dependency>
 
         <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-properties</artifactId>
-            <version>2.9.7</version>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.9.5.redhat-001</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -129,7 +133,6 @@
             </plugin>
         </plugins>
     </build>
-
 
 
     <repositories>

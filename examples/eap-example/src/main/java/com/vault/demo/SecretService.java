@@ -10,7 +10,7 @@ import javax.inject.Inject;
 public class SecretService {
 
     @Inject
-    @Property
+    @Property("secret.example.password")
     String password;
 
 

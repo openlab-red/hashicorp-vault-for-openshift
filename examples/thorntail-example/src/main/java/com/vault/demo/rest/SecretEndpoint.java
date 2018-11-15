@@ -16,7 +16,7 @@ import javax.ws.rs.Produces;
 public class SecretEndpoint {
 
     @Inject
-    @ConfigurationValue("password")
+    @ConfigurationValue("secret.example.password")
     String password;
 
     @GET

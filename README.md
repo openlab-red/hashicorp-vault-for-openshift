@@ -178,7 +178,7 @@ vault secrets enable -tls-skip-verify database
 vault write -tls-skip-verify database/config/postgresql \
     plugin_name=postgresql-database-plugin \
     allowed_roles="pg-readwrite" \
-    connection_url="postgresql://{{username}}:{{password}}@postgresql.hashicorp-vault.svc:5432/sampledb?sslmode=disable" \
+    connection_url="postgresql://{{username}}:{{password}}@postgresql.app.svc:5432/sampledb?sslmode=disable" \
     username="postgres" \
     password="postgres" 
 ```
@@ -359,7 +359,7 @@ Follow the instruction from [Vault Secret Fetcher ](https://github.com/openlab-r
 
     ```     
         oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
-        oc create -f examples/eap-example/eap-example.yaml
+        oc create -f eap-example.yaml
     ``` 
 
 ## Mutating Webhook Configuration
