@@ -178,7 +178,7 @@ vault secrets enable -tls-skip-verify database
 vault write -tls-skip-verify database/config/postgresql \
     plugin_name=postgresql-database-plugin \
     allowed_roles="pg-readwrite" \
-    connection_url="postgresql://{{username}}:{{password}}@postgresql.hashicorp-vault.svc:5432/sampledb?sslmode=disable" \
+    connection_url="postgresql://{{username}}:{{password}}@postgresql.app.svc:5432/sampledb?sslmode=disable" \
     username="postgres" \
     password="postgres" 
 ```
