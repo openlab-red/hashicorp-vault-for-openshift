@@ -46,14 +46,14 @@ spec:
     metadata:
       annotations:
         sidecar.agent.vaultproject.io/inject: "true"
-        sidecar.agent.vaultproject.io/secret-key: secret/example
+        sidecar.agent.vaultproject.io/secret-key: secret/example,database/creds/pg-readwrite
         sidecar.agent.vaultproject.io/vault-role: example
       labels:
         app: thorntail-example       
     spec:
       containers:
         - args:
-            - '-s/var/run/secrets/vaultproject.io/application.yaml'
+            - '-s/var/run/secrets/vaultproject.io/application.yaml -Spostgres'
           command:
             - /opt/run-java/run-java.sh
           name: thorntail-example
