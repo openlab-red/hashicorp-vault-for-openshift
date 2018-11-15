@@ -1,4 +1,6 @@
-package com.vault.demo;
+package com.vault.demo.rest;
+
+import com.vault.demo.SecretService;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;

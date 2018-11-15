@@ -12,4 +12,4 @@ embed-server --server-config=standalone-openshift.xml
 
 run-batch
 
-:reload
+reload
