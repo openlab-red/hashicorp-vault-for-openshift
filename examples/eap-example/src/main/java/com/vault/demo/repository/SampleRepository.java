@@ -2,12 +2,13 @@ package com.vault.demo.repository;
 
 import com.vault.demo.domain.Sample;
 
+import javax.ejb.Stateless;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.util.List;
 
-@ApplicationScoped
+@Stateless
 public class SampleRepository {
 
     @Inject
