@@ -131,7 +131,7 @@ spec:
             - name: VAULT_TOKEN
               value: /var/run/secrets/vaultproject.io/token
             - name: VAULT_SECRET
-              value: secret/example
+              value: secret/example,database/creds/pg-readwrite
             - name: PROPERTIES_FILE
               value: /var/run/secrets/vaultproject.io/application.yaml
           image: openlabred/vault-secret-fetcher:v1.0.1

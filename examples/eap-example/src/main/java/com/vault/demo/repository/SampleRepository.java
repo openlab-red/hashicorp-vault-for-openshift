@@ -12,10 +12,10 @@ import java.util.List;
 public class SampleRepository {
 
     @Inject
-    private EntityManager em;
+    PersistenceHelper helper;
 
     public List<Sample> findAll() {
-        return em.createNamedQuery("Sample.findAll", Sample.class).getResultList();
+        return helper.getEntityManager().createNamedQuery("Sample.findAll", Sample.class).getResultList();
 
     }
 }
