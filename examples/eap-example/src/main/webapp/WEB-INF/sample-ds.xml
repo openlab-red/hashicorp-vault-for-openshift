@@ -1,6 +1,6 @@
 <datasources xmlns="http://www.jboss.org/ironjacamar/schema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://www.jboss.org/ironjacamar/schema http://docs.jboss.org/ironjacamar/schema/datasources_1_0.xsd">
-    <datasource jndi-name="java:jboss/datasources/sampleDS" pool-name="SampleDS" enabled="true" use-java-context="true">
+    <datasource jndi-name="java:jboss/datasources/SampleDS" pool-name="SampleDS" enabled="true" use-java-context="true">
         <connection-url>jdbc:postgresql://localhost:5432/sampledb</connection-url>
         <driver>postgresql</driver>
         <security>
