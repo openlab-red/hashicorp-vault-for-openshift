@@ -11,8 +11,8 @@ import javax.sql.DataSource;
 @DataSourceDefinition(
         name = "java:jboss/datasources/SampleDS",
         className = "org.postgresql.xa.PGXADataSource",
-        user = "postgres",
-        password = "postgres",
+        user = "${database.creds.pg-readwrite.username}",
+        password = "${database.creds.pg-readwrite.password}",
         serverName = "postgresql",
         portNumber = 5432,
         databaseName = "sampledb",
