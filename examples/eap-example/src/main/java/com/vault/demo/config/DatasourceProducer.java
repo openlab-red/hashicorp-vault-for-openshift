@@ -13,7 +13,7 @@ import javax.sql.DataSource;
         className = "org.postgresql.xa.PGXADataSource",
         user = "postgres",
         password = "postgres",
-        serverName = "postgres",
+        serverName = "postgresql",
         portNumber = 5432,
         databaseName = "sampledb",
         minPoolSize = 10,
