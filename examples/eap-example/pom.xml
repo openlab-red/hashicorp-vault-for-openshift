@@ -22,6 +22,7 @@
         <httpclient.version>4.5.2.redhat-1</httpclient.version>
         <version.org.apache.commons.commons-lang3>3.5</version.org.apache.commons.commons-lang3>
         <version.org.wildfly.checkstyle-config>1.0.6.Final</version.org.wildfly.checkstyle-config>
+        <version.postgresql>42.2.5</version.postgresql>
     </properties>
 
     <dependencyManagement>
@@ -74,6 +75,11 @@
                 <artifactId>snakeyaml</artifactId>
                 <version>1.19</version>
             </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${version.postgresql}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -93,7 +99,7 @@
 
         <dependency>
             <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
+            <artifactId>hibernate-core</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -125,6 +131,11 @@
             <artifactId>junit</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
