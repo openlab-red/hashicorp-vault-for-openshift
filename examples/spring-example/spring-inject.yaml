@@ -59,7 +59,7 @@ spec:
     spec:
       containers:
       - env:
-        - name: SPRING_CONFIG_LOCATION
+        - name: SPRING_CONFIG_ADDITIONAL_LOCATION
           value: /var/run/secrets/vaultproject.io/application.yaml
         image: spring-example:latest
         imagePullPolicy: Always
