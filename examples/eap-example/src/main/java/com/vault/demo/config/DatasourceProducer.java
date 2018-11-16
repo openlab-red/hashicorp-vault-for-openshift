@@ -2,28 +2,26 @@ package com.vault.demo.config;
 
 import javax.annotation.Resource;
 import javax.annotation.sql.DataSourceDefinition;
-import javax.ejb.DependsOn;
+import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
 import javax.sql.DataSource;
 
-
-
+@Singleton
 @DataSourceDefinition(
         name = "java:jboss/datasources/SampleDS",
         className = "org.postgresql.xa.PGXADataSource",
         user = "postgres",
         password = "postgres",
-        serverName = "postgresql",
+        serverName = "postgres",
         portNumber = 5432,
-        databaseName = "sampledb")
-@Singleton
+        databaseName = "sampledb",
+        minPoolSize = 10,
+        maxPoolSize = 50)
 @Startup
-@DependsOn("PropertyProducer")
 public class DatasourceProducer {
 
-    @Resource(lookup = "java:jboss/datasources/SampleDS")
+    @Resource(lookup="java:jboss/datasources/SampleDS")
     DataSource ds;
 
     @Produces

@@ -4,7 +4,6 @@ import com.vault.demo.domain.Sample;
 import com.vault.demo.repository.SampleRepository;
 
 import javax.ejb.Stateless;
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

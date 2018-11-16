@@ -2,6 +2,7 @@
     <deployment>
         <dependencies>
             <module name="vaultproject.io" export="true"/>
+            <module name="org.postgresql" export="true"/>
         </dependencies>
     </deployment>
 </jboss-deployment-structure>
