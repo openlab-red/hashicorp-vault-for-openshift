@@ -3,6 +3,7 @@ package com.vault.demo.config;
 import org.yaml.snakeyaml.Yaml;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.sql.DataSourceDefinition;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.enterprise.inject.Produces;
