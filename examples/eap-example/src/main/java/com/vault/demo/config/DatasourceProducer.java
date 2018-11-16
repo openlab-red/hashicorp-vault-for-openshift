@@ -2,6 +2,7 @@ package com.vault.demo.config;
 
 import javax.annotation.Resource;
 import javax.annotation.sql.DataSourceDefinition;
+import javax.ejb.DependsOn;
 import javax.ejb.Startup;
 import javax.enterprise.inject.Produces;
 import javax.inject.Singleton;
@@ -19,6 +20,7 @@ import javax.sql.DataSource;
         databaseName = "sampledb")
 @Singleton
 @Startup
+@DependsOn("PropertyProducer")
 public class DatasourceProducer {
 
     @Resource(lookup = "java:jboss/datasources/SampleDS")
