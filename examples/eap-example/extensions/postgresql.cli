@@ -2,7 +2,7 @@ batch
 
 embed-server --server-config=standalone-openshift.xml
 
-/subsystem=datasources/data-source=SampleDS:add(jndi-name="java:jboss/datasources/sampleDS",connection-url="jdbc:postgresql://postgresql:5432/sampledb",driver-name=postgresql,user-name=postgres,password=postgres)
+/subsystem=datasources/data-source=SampleDS:add(jndi-name="java:jboss/datasources/SampleDS",connection-url="jdbc:postgresql://postgresql:5432/sampledb",driver-name=postgresql,user-name=postgres,password=postgres)
 
 run-batch
 
