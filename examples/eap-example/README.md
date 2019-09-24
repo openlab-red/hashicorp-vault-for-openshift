@@ -34,5 +34,5 @@
 
     ```     
         oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
-        oc create -f examples/eap-example/eap-inject.yaml
+        oc create -f eap-inject.yaml
     ``` 
