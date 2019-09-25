@@ -27,7 +27,7 @@ spec:
         app: vault
     spec:
       containers:
-      - image: vault:0.11.3
+      - image: vault:1.2.3
         name: vault
         ports:
         - containerPort: 8200
@@ -38,7 +38,9 @@ spec:
         - -log-level=debug    
         env:
         - name: SKIP_SETCAP
-          value: 'true' 
+          value: 'true'
+        - name: SKIP_CHOWN
+          value: 'true'
         - name: VAULT_LOCAL_CONFIG
           valueFrom:
             configMapKeyRef:
