@@ -13,14 +13,17 @@ spec:
   selector:
     app: vault
 ---
-apiVersion: v1
-kind: DeploymentConfig
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   labels:
     app: vault
   name: vault
 spec:
   replicas: 1
+  selector:
+      matchLabels:
+        app: vault
   template:
     metadata:
       labels:
@@ -50,6 +53,8 @@ spec:
         - name: vault-file-backend
           mountPath: /vault/file
           readOnly: false
+        - name: vault-config
+          mountPath: /vault/config
         - name: vault-cert
           mountPath: /var/run/secrets/kubernetes.io/certs
         livenessProbe:
@@ -66,6 +71,8 @@ spec:
       - name: vault-file-backend
         persistentVolumeClaim:
           claimName: vault-file-backend
+      - name: vault-config
+        emptyDir: {}
       - name: vault-cert
         secret:
           secretName: vault-cert          

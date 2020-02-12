@@ -5,9 +5,6 @@
 ```
 oc new-project hashicorp-vault
 
-oc adm policy add-scc-to-user privileged -z default
-oc get scc privileged -o yaml | grep system:serviceaccount:hashicorp-vault:default
-
 oc create configmap vault-config --from-file=vault-config=./vault/vault-config.json
 oc get cm vault-config -o yaml
 
