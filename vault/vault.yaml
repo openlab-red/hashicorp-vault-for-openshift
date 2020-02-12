@@ -27,7 +27,7 @@ spec:
         app: vault
     spec:
       containers:
-      - image: vault:1.2.3
+      - image: vault:1.3.2
         name: vault
         ports:
         - containerPort: 8200
@@ -62,8 +62,6 @@ spec:
             path: 'v1/sys/health?standbyok=true&standbycode=200&sealedcode=200&uninitcode=200'
             port: 8200
             scheme: HTTPS
-        securityContext:
-          privileged: true
       volumes:
       - name: vault-file-backend
         persistentVolumeClaim:
