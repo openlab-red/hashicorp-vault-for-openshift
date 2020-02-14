@@ -2,15 +2,13 @@
 
 ```
 oc project app
-
-oc create configmap vault-agent-config --from-file=vault-agent-config=agent/vault-agent.config
-oc create -f agent/vault-agent.yaml
+oc apply -f agent/install/ -n app
 ```
 
 Find token under */var/run/secrets/vaultproject.io/token*
 
 ```
-pod=$(oc get pods -lapp=vault-agent --no-headers -o custom-columns=NAME:.metadata.name)
+pod=$(oc get pods -lapp.kubernetes.io/name=vault-agent --no-headers -o custom-columns=NAME:.metadata.name -n app)
 oc exec $pod -- cat /var/run/secrets/vaultproject.io/token
 ```
 

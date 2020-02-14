@@ -39,26 +39,27 @@ oc adm  pod-network make-projects-global hashicorp
 export VAULT_ADDR=https://$(oc get route vault --no-headers -o custom-columns=HOST:.spec.host)
 echo $VAULT_ADDR
 
-vault operator init -key-shares=1 -key-threshold=1
+vault operator init --tls-skip-verify -key-shares=1 -key-threshold=1
 ```
 
 Save the `Unseal Key 1` and the `Initial Root Token`:
 
 ```
-Unseal Key 1: 60Lr2MnuPlmuKnFBoNgWWYjiUSdQ9NEkXpyFUsKnMKc=
-Initial Root Token: s.v4mWjWAPsf78LBV6LQ0DzVzM
+Unseal Key 1: 0kTgW1xkR5ffzJIhXq03E/n1hRsejfAvyODyqDu2RZg=
+
+Initial Root Token: s.HwgcebFWZ4cJ6VuqAgHTmkCS
 ```
 
 And export them as environment variables, for further use:
 
 ```
-export KEYS=60Lr2MnuPlmuKnFBoNgWWYjiUSdQ9NEkXpyFUsKnMKc=
-export ROOT_TOKEN=s.v4mWjWAPsf78LBV6LQ0DzVzM
+export KEYS=0kTgW1xkR5ffzJIhXq03E/n1hRsejfAvyODyqDu2RZg=
+export ROOT_TOKEN=s.HwgcebFWZ4cJ6VuqAgHTmkCS
 export VAULT_TOKEN=$ROOT_TOKEN
 ```
 
 ## Unseal Vault
 
 ```
-vault operator unseal $KEYS
+vault operator unseal --tls-skip-verify $KEYS
 ```

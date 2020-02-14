@@ -28,7 +28,9 @@ oc -n hashicorp patch sts consul-consul-server --type json --patch="[
 
 Expose Consul UI
 
-oc create route reencrypt consul --port=8500 --service=consul-consul-server
+```
+oc -n hashicorp create route reencrypt consul --port=8500 --service=consul-consul-server
+```
 
 ## Vault Installation
 

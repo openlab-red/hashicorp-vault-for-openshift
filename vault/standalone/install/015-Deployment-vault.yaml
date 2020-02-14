@@ -51,10 +51,16 @@ spec:
             port: 8200
             scheme: HTTPS
         readinessProbe:
-          httpGet:
-            path: 'v1/sys/health?standbyok=true&standbycode=200&sealedcode=200&uninitcode=200'
-            port: 8200
-            scheme: HTTPS
+          exec:
+            command:
+            - /bin/sh
+            - -ec
+            - vault status -tls-skip-verify
+          failureThreshold: 2
+          initialDelaySeconds: 5
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 5
         resources:
           requests:
             memory: 256Mi

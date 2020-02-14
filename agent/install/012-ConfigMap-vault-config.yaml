@@ -1,0 +1,49 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vault-agent-config
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
+data:
+  template.ctmpl: |
+    {{ with secret "secret/example" }}
+    password = {{ .Data.password }}
+    {{ end }}
+  agent.config: |
+    pid_file = "/var/run/secrets/vaultproject.io/pid"
+
+    auto_auth {
+            method "kubernetes"  {
+                    type = "kubernetes"
+                    mount_path = "auth/kubernetes"
+                    config = {
+                            role = "example"
+                            jwt = "@/var/run/secrets/kubernetes.io/serviceaccount/token"
+                    }
+            }
+
+            sink "file" {
+                    type = "file"
+                    config = {
+                            path = "/var/run/secrets/vaultproject.io/token"
+                    }
+            }
+
+    }
+
+    template {
+        source      = "/vault/config/template.ctmpl"
+        destination = "/var/run/secrets/vaultproject.io/application.properties"
+    }
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vault-agent-cabundle
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+data: {}

@@ -4,7 +4,6 @@ metadata:
   name: vault
   annotations:
     service.alpha.openshift.io/serving-cert-secret-name: vault-cert
-    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
   labels:
     app.kubernetes.io/instance: vault
     app.kubernetes.io/name: vault
@@ -15,4 +14,3 @@ spec:
   selector:
     app.kubernetes.io/instance: vault
     app.kubernetes.io/name: vault
-  publishNotReadyAddresses: true
