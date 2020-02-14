@@ -1,7 +1,10 @@
 apiVersion: extensions/v1beta1
 kind: NetworkPolicy
 metadata:
-  name: allow-vault
+  name: vault
+  labels:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: vault
 spec:
   ingress:
   - from:

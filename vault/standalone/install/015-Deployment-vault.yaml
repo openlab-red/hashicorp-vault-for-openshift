@@ -1,33 +1,21 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: vault
-  annotations:
-    service.alpha.openshift.io/serving-cert-secret-name: vault-cert
-  labels:
-    app: vault
-spec:
-  ports:
-  - name: vault
-    port: 8200
-  selector:
-    app: vault
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: vault
+    app.kubernetes.io/instance: vault
+    app.kubernetes.io/name: vault
   name: vault
 spec:
   replicas: 1
   selector:
       matchLabels:
-        app: vault
+        app.kubernetes.io/instance: vault
+        app.kubernetes.io/name: vault
   template:
     metadata:
       labels:
-        app: vault
+        app.kubernetes.io/instance: vault
+        app.kubernetes.io/name: vault
     spec:
       containers:
       - image: vault:1.3.2
@@ -50,12 +38,12 @@ spec:
               name: vault-config
               key: vault-config
         volumeMounts:      
-        - name: vault-file-backend
-          mountPath: /vault/file
+        - name: data
+          mountPath: /vault/data
           readOnly: false
-        - name: vault-config
+        - name: config
           mountPath: /vault/config
-        - name: vault-cert
+        - name: cert
           mountPath: /var/run/secrets/kubernetes.io/certs
         livenessProbe:
           httpGet:
@@ -67,23 +55,28 @@ spec:
             path: 'v1/sys/health?standbyok=true&standbycode=200&sealedcode=200&uninitcode=200'
             port: 8200
             scheme: HTTPS
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 250m
+          limits:
+            memory: 256Mi
+            cpu: 250m
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - sleep 5 && kill -SIGTERM $(pidof vault)
+      serviceAccount: vault
+      serviceAccountName: vault
       volumes:
-      - name: vault-file-backend
+      - name: data
         persistentVolumeClaim:
-          claimName: vault-file-backend
-      - name: vault-config
+          claimName: vault-storage
+      - name: config
         emptyDir: {}
-      - name: vault-cert
+      - name: cert
         secret:
-          secretName: vault-cert          
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: vault-file-backend
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi                    
+          secretName: vault-cert

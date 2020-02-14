@@ -2,134 +2,72 @@
 
 ## Deploy Vault on OpenShift
 
-```
-oc new-project hashicorp
+### [Standalone Deployment](vault/standalone/README.md)
 
-oc create configmap vault-config --from-file=vault-config=./vault/vault-config.json
-oc get cm vault-config -o yaml
-
-oc create -f ./vault/vault.yaml
-oc create route reencrypt vault --port=8200 --service=vault
-```
-
-## Initialize Vault
-
-```
-export VAULT_ADDR=https://$(oc get route vault --no-headers -o custom-columns=HOST:.spec.host)
-echo $VAULT_ADDR
-
-vault operator init -key-shares=1 -key-threshold=1
-```
-
-Save the `Unseal Key 1` and the `Initial Root Token`:
-
-```
-Unseal Key 1: KCP9uXwOQKzodtX836kpWOQ9Pm+nd3Aac5WJoJvBPwk=
-Initial Root Token: s.PkHVhxWv7hnLdvnxQNFeI3ar
-```
-
-And export them as environment variables, for further use:
-
-```
-export KEYS=KCP9uXwOQKzodtX836kpWOQ9Pm+nd3Aac5WJoJvBPwk=
-export ROOT_TOKEN=s.PkHVhxWv7hnLdvnxQNFeI3ar
-export VAULT_TOKEN=$ROOT_TOKEN
-```
-
-## Unseal Vault
-
-```
-vault operator unseal $KEYS
-```
+### [High Availability Deployment](vault/ha/README.md)
 
 ## Configure Kubernetes Auth with the Vault
 
+* Standalone
+    ```
+    POD=$(oc get pods -lapp.kubernetes.io/name=vault --no-headers -o custom-columns=NAME:.metadata.name)
+    oc rsh $POD
+    ```
+
+* HA
+    ```
+    oc rsh vault-0
+    ```
+
+Exec the following command.
+
 ```
-oc adm policy add-cluster-role-to-user system:auth-delegator system:serviceaccount:hashicorp:vault
-
-POD=$(oc get pods -lapp.kubernetes.io/name=vault --no-headers -o custom-columns=NAME:.metadata.name)
-
-oc exec -it $POD /bin/sh
-```
-
-Exec into the Vault pod 
-
-```
-export KEYS=KCP9uXwOQKzodtX836kpWOQ9Pm+nd3Aac5WJoJvBPwk=
-export ROOT_TOKEN=s.PkHVhxWv7hnLdvnxQNFeI3ar
+export KEYS=60Lr2MnuPlmuKnFBoNgWWYjiUSdQ9NEkXpyFUsKnMKc=
+export ROOT_TOKEN=s.v4mWjWAPsf78LBV6LQ0DzVzM
 export VAULT_TOKEN=$ROOT_TOKEN
 
 JWT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 KUBERNETES_HOST=https://${KUBERNETES_PORT_443_TCP_ADDR}:443
 
-vault auth enable kubernetes
-
-vault write auth/kubernetes/config token_reviewer_jwt=$JWT kubernetes_host=$KUBERNETES_HOST kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+vault auth enable --tls-skip-verify kubernetes
+vault write --tls-skip-verify auth/kubernetes/config token_reviewer_jwt=$JWT kubernetes_host=$KUBERNETES_HOST kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
 ```
 
-## Sample Policy
+## Use Vault from your local
 
 ```
-vault policy write policy-example policy/policy-example.hcl
+export VAULT_ADDR=https://$(oc get route vault --no-headers -o custom-columns=HOST:.spec.host)
 ```
 
-## Authorisation
+### Sample Policy
 
 ```
-vault write auth/kubernetes/role/example \
+vault policy write --tls-skip-verify policy-example policy/policy-example.hcl
+```
+
+### Authorisation
+
+```
+vault write --tls-skip-verify auth/kubernetes/role/example \
     bound_service_account_names=default bound_service_account_namespaces='app' \
     policies=policy-example \
     ttl=2h
 ```
 
-## Write Sample Data
+### Write Sample Data
 
 ```
-vault secrets enable -path=secret kv
-vault write secret/example password=pwd
+vault secrets enable --tls-skip-verify -path=secret kv
+vault write --tls-skip-verify  secret/example password=pwd
 ```
 
-## Expose Vault to Other OpenShift Projects/Client Applications
-
-### With SDN Multi Tenant
-
-```
-oc adm  pod-network make-projects-global hashicorp
-```
-
-### With SDN Network Policy
-
-```yml
-apiVersion: extensions/v1beta1
-kind: NetworkPolicy
-metadata:
-  name: allow-vault
-spec:
-  ingress:
-  - from:
-    - namespaceSelector: {}
-    ports:
-    - port: 8200
-      protocol: TCP
-  podSelector:
-    matchLabels:
-      app: vault
-  policyTypes:
-  - Ingress
-```
-
-```
-oc apply -f vault/app-allow-vault.yaml
-```
-
-
-## Test Vault Client
+### Test Vault Client
 
 ```
 oc new-project app
 
 JWT=$(oc sa get-token default -n app)
-vault write  auth/kubernetes/login role=example jwt=${JWT}
+vault write --tls-skip-verify auth/kubernetes/login role=example jwt=${JWT}
 
 ```
 
@@ -138,30 +76,30 @@ Sample output:
 ```
 Key                                       Value
 ---                                       -----
-token                                     s.GjgrhyYLUaB80IMBwp4tX77r
-token_accessor                            P3sZIoGMrwjoIOqZRuf0Wspe
+token                                     s.Uq8cOrLAIFdFh4kxfkKpMicx
+token_accessor                            ZGqVZg8FMzA6mlBUufp894FK
 token_duration                            2h
 token_renewable                           true
 token_policies                            ["default" "policy-example"]
 identity_policies                         []
 policies                                  ["default" "policy-example"]
-token_meta_service_account_uid            4c69a1f8-fc93-4300-958c-04f349936431
 token_meta_role                           example
 token_meta_service_account_name           default
 token_meta_service_account_namespace      app
 token_meta_service_account_secret_name    default-token-v8fjh
+token_meta_service_account_uid            4c69a1f8-fc93-4300-958c-04f349936431
 ```
 
 Read the secret:
 
 ```
-export VAULT_TOKEN=s.GjgrhyYLUaB80IMBwp4tX77r
-vault read  secret/example
+export VAULT_TOKEN=s.Uq8cOrLAIFdFh4kxfkKpMicx
+vault read --tls-skip-verify secret/example
 ```
 
-## Vault Database secret
+### Vault Database secret
 
-### Deploy postgresql
+#### Deploy postgresql
 
 ```
 oc new-app postgresql-persistent \
@@ -172,16 +110,16 @@ oc new-app postgresql-persistent \
     --env POSTGRESQL_ADMIN_PASSWORD=postgres 
 ```
 
-### Enable datatabase secret in vault
+#### Enable datatabase secret in vault
 
 ```
 vault secrets enable database
 ```
 
-### Install postgresql plugin
+#### Install postgresql plugin
 
 ```
-vault write  database/config/postgresql \
+vault write --tls-skip-verify database/config/postgresql \
     plugin_name=postgresql-database-plugin \
     allowed_roles="pg-readwrite" \
     connection_url="postgresql://{{username}}:{{password}}@postgresql.app.svc:5432/sampledb?sslmode=disable" \
@@ -189,11 +127,11 @@ vault write  database/config/postgresql \
     password="postgres" 
 ```
 
-### Role mapping
+#### Role mapping
 
 ```
 
-vault write  database/roles/pg-readwrite \
+vault write --tls-skip-verify database/roles/pg-readwrite \
     db_name=postgresql \
     creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
         GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
@@ -202,29 +140,29 @@ vault write  database/roles/pg-readwrite \
 
 ```
     
-### Sample Policy
+#### Sample Policy
 
 The policy contains both secret/example path and database/creds/pg-readwrite
 
 ```
-vault policy write  pg-readwrite policy/policy-database.hcl 
+vault policy write --tls-skip-verify pg-readwrite policy/policy-database.hcl 
 ```
 
 
-### Authorisation
+#### Authorisation
 
 ```
-vault write  auth/kubernetes/role/example \
+vault write --tls-skip-verify auth/kubernetes/role/example \
     bound_service_account_names=default bound_service_account_namespaces='app' \
     policies=pg-readwrite \
     ttl=2h 
 ```
 
 
-### Read credentials
+#### Read credentials
 
 ```
-vault read  database/creds/pg-readwrite
+vault read --tls-skip-verify database/creds/pg-readwrite
 
 ```
 
@@ -254,13 +192,13 @@ postgres=# \du
  v-root-pg-readw-57OZENOr1AYEhqt3n4xY-1541144444 | Password valid until 2018-11-02 08:40:49+00                | {}
 ```
 
-### Test Vault Client
+#### Test Vault Client
 
 ```
 oc project app
 
 JWT=$(oc sa get-token default -n app)
-vault write  auth/kubernetes/login role=pg-readwrite jwt=${JWT}
+vault write --tls-skip-verify auth/kubernetes/login role=pg-readwrite jwt=${JWT}
 
 ```
 
@@ -293,32 +231,7 @@ vault read  secret/example
 
 # Vault Agent
 
-## Standalone
-
-```
-oc project app
-
-oc create configmap vault-agent-config --from-file=vault-agent-config=agent/vault-agent.config
-oc create -f agent/vault-agent.yaml
-```
-
-Find token under */var/run/secrets/vaultproject.io/token*
-
-```
-pod=$(oc get pods -lapp=vault-agent --no-headers -o custom-columns=NAME:.metadata.name)
-oc exec $pod -- cat /var/run/secrets/vaultproject.io/token
-```
-
-```
-87kor7VqW7N4GZIAwnNWGijr
-```
-
-Read the secret:
-
-```
-export VAULT_TOKEN=87kor7VqW7N4GZIAwnNWGijr
-vault read  secret/example
-```
+## [Standalone Deployment](vault/standalone/README.md)
 
 ## Manual Sidecar Container
 

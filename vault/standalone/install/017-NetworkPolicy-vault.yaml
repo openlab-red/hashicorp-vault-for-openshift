@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: NetworkPolicy
+metadata:
+  name: vault
+  labels:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: vault
+spec:
+  ingress:
+  - from:
+    - namespaceSelector: {}
+    ports:
+    - port: 8200
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app: vault
+  policyTypes:
+  - Ingress
