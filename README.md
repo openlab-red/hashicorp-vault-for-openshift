@@ -231,7 +231,7 @@ vault read  secret/example
 
 # Vault Agent
 
-## [Standalone Deployment](vault/standalone/README.md)
+## [Standalone Deployment](agent/README.md)
 
 ## Manual Sidecar Container
 

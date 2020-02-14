@@ -8,8 +8,8 @@ oc apply -f agent/install/ -n app
 Find token under */var/run/secrets/vaultproject.io/token*
 
 ```
-pod=$(oc get pods -lapp.kubernetes.io/name=vault-agent --no-headers -o custom-columns=NAME:.metadata.name -n app)
-oc exec $pod -- cat /var/run/secrets/vaultproject.io/token
+POD=$(oc get pods -lapp.kubernetes.io/name=vault-agent --no-headers -o custom-columns=NAME:.metadata.name -n app)
+oc -n app exec $POD -- cat /var/run/secrets/vaultproject.io/token
 ```
 
 ```
