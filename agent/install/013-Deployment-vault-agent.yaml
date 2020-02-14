@@ -31,10 +31,6 @@ spec:
         env:
         - name: SKIP_SETCAP
           value: 'true'
-        - name: "VAULT_ADDR"
-          value: "https://vault.hashicorp.svc.cluster.local:8200"
-        - name: "VAULT_CAPATH"
-          value: "/vault/ca/service-ca.crt"
         volumeMounts:
         - mountPath: /vault/config
           name: vault-config

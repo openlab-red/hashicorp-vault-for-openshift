@@ -12,7 +12,6 @@ data:
     ui = true
 
     listener "tcp" {
-      tls_disable = 1
       address = "[::]:8200"
       cluster_address = "[::]:8201"
       tls_cert_file = "/var/run/secrets/kubernetes.io/certs/tls.crt"

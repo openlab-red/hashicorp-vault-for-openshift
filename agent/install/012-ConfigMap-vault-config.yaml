@@ -11,6 +11,12 @@ data:
     password = {{ .Data.password }}
     {{ end }}
   agent.config: |
+
+    vault {
+        ca_path = "/vault/ca/service-ca.crt"
+        address = "https://vault.hashicorp.svc.cluster.local:8200"
+    }
+
     pid_file = "/var/run/secrets/vaultproject.io/pid"
 
     auto_auth {
