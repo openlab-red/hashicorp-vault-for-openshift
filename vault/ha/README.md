@@ -32,6 +32,17 @@ oc create route reencrypt consul --port=8500 --service=consul-consul-server
 
 ## Vault Installation
 
+>
+> Vault helm chart is not used on purpose, the aim is to understand all components involed.
+>
+> If you like to use vault helm chart in OpenShift consider the following.
+>
+> IPC_LOCK capability is fixed and it cannot be removed. This is not necessary because in OpenShift the swap is disabled.
+>
+> The User, Group and fsGroup id are fixed on the manifest, the values can be overridden but still is not necessary to force the id.
+>
+
+
 ```
 oc apply -f ./vault/ha/install/
 ```
