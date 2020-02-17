@@ -36,8 +36,8 @@ oc adm  pod-network make-projects-global hashicorp
 ## Initialize Vault
 
 ```
-export VAULT_ADDR=https://$(oc get route vault --no-headers -o custom-columns=HOST:.spec.host)
-echo $VAULT_ADDR
+POD=$(oc get pods -lapp.kubernetes.io/name=vault --no-headers -o custom-columns=NAME:.metadata.name)
+oc rsh $POD
 
 vault operator init --tls-skip-verify -key-shares=1 -key-threshold=1
 ```

@@ -13,12 +13,12 @@ oc -n app exec $POD -- cat /var/run/secrets/vaultproject.io/token
 ```
 
 ```
-87kor7VqW7N4GZIAwnNWGijr
+s.u8TtYRtHXZCz3KWbmlkLIvMc
 ```
 
 Read the secret:
 
 ```
-export VAULT_TOKEN=87kor7VqW7N4GZIAwnNWGijr
+export VAULT_TOKEN=s.u8TtYRtHXZCz3KWbmlkLIvMc
 vault read --tls-skip-verify secret/example
 ```
