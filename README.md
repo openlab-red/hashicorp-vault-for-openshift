@@ -235,53 +235,18 @@ vault read  secret/example
 
 ## Manual Sidecar Container
 
-Using **Agent Vault** and **Vault Secret Fetcher** as sidecar containers
-
-Follow the instruction from [Vault Secret Fetcher ](https://github.com/openlab-red/vault-secret-fetcher) to publish the vault secret fetcher image in OpenShift.
-
+Using **Agent Vault** as sidecar containers
 
 > **Note**
 >
 > Right now all the examples only read the properties file at bootstrap.
 >
 
-### Spring Example
+### [Spring Example](examples/spring-example/README.md)
+### [Thorntail Example](examples/thorntail-example/README.md)
+### [EAP Example](examples/eap-example/README.md)
 
-```
-    oc project app
-
-    oc new-build --name=spring-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/spring-example
-    oc create -f examples/spring-example/spring-example.yaml
-```
-
-### Thorntail Example
-
-```
-    oc project app
-
-    oc new-build --name=thorntail-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/thorntail-example
-    oc create -f examples/thorntail-example/thorntail-example.yaml
-```
-
-### EAP Example
-
-1. Enable Annotation Property Replacement and Vault Module for properties
-
-    ```
-        oc project app
-
-        cd examples/eap-example
-        oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
-    ```
-
-2. Deploy EAP application
-
-    ```     
-        oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
-        oc create -f eap-example.yaml
-    ``` 
-
-## Mutating Webhook Configuration
+# Mutating Webhook Configuration
 
 1. Configure Mutating WebHook
 
@@ -293,45 +258,13 @@ Follow the instruction from [Vault Secret Fetcher ](https://github.com/openlab-r
     oc label namespace app vault-agent-webhook=enabled
     ```
         
-### Spring Example
-
-```
-oc project app
-
-oc new-build --name=spring-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/spring-example
-oc create -f examples/spring-example/spring-inject.yaml
-```
-
-
-
-### Thorntail Example
-
-```
-oc project app
-
-oc new-build --name=thorntail-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/thorntail-example
-oc create -f examples/thorntail-example/thorntail-inject.yaml
-```
-
-### EAP Example
-
-
-1. Enable Annotation Property Replacement and Vault Module for properties
-
-    ```
-        cd examples/eap-example
-        oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
-    ```
-
-2. Deploy EAP application
-
-    ```     
-        oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
-        oc create -f examples/eap-example/eap-inject.yaml
-    ``` 
+### [Spring Example](examples/spring-example/README.md)
+### [Thorntail Example](examples/thorntail-example/README.md)
+### [EAP Example](examples/eap-example/README.md)
 
 # References
 
+* https://www.vaultproject.io/docs/agent/template/index.html
 * https://github.com/raffaelespazzoli/credscontroller
 * https://blog.openshift.com/managing-secrets-openshift-vault-integration/
 * https://blog.openshift.com/vault-integration-using-kubernetes-authentication-method

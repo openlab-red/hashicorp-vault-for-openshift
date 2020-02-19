@@ -1,38 +1,29 @@
 # EAP Example 
 
-
-## Manual Sidecar Container
+## Build the Application
 
 1. Enable Annotation Property Replacement and Vault Module for properties
 
     ```
         oc project app
 
-        cd examples/eap-example
         oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
+
+2. Build    
+    ```
+        oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example 
     ```
 
-2. Deploy EAP application
+## Deploy
+ 
+### Manual Sidecar Container
 
-    ```     
-        oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
-        oc apply -f eap-example.yaml
-    ``` 
+```
+    oc apply -f examples/eap-example/eap-example.yaml
+```
 
+### Mutating Webhook Configuration
 
-## Mutating Webhook Configuration
-
-
-1. Enable Annotation Property Replacement and Vault Module for properties
-
-    ```
-        cd examples/eap-example
-        oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
-    ```
-
-2. Deploy EAP application
-
-    ```     
-        oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
-        oc apply -f eap-inject.yaml
-    ``` 
+```
+    oc apply -f examples/eap-example/eap-inject.yaml
+```
