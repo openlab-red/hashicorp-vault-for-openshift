@@ -1,9 +1,24 @@
-apiVersion: v1
 kind: ConfigMap
+apiVersion: v1
 metadata:
   name: vault-agent-config
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
 data:
-  vault-agent-config: |-
+  template.ctmpl: |
+    {{ with secret "secret/example" }}
+    secret:
+      example:
+        password: {{ .Data.password }}
+    {{ end }}
+  agent.config: |
+
+    vault {
+        ca_path = "/vault/ca/service-ca.crt"
+        address = "https://vault.hashicorp.svc.cluster.local:8200"
+    }
+
     pid_file = "/var/run/secrets/vaultproject.io/pid"
 
     auto_auth {
@@ -22,7 +37,25 @@ data:
                             path = "/var/run/secrets/vaultproject.io/token"
                     }
             }
+
     }
+
+    template {
+        source      = "/vault/config/template.ctmpl"
+        destination = "/var/run/secrets/vaultproject.io/application.yaml"
+    }
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vault-agent-cabundle
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+data: {}
 
 ---
 apiVersion: v1
@@ -38,6 +71,7 @@ spec:
     targetPort: 8080
   selector:
     app: eap-example
+
 ---
 apiVersion: v1
 kind: Service
@@ -53,7 +87,6 @@ spec:
   selector:
     app: eap-example
 ---
-
 
 apiVersion: route.openshift.io/v1
 kind: Route
@@ -71,78 +104,38 @@ apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
 metadata:
   labels:
-    app: eap-example
-    application: eap-example
-    template: eap71-basic-s2i
-    xpaas: 1.4.12
+    app.kubernetes.io/instance: eap-example
+    app.kubernetes.io/name: eap-example
   name: eap-example
 spec:
+  triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - eap-example
+        from:
+          kind: ImageStreamTag
+          name: 'eap-example:latest'
+      type: ImageChange
+    - type: ConfigChange
   replicas: 1
   revisionHistoryLimit: 10
   selector:
-    deploymentConfig: eap-example
+    app.kubernetes.io/instance: eap-example
+    app.kubernetes.io/name: eap-example
   strategy:
     activeDeadlineSeconds: 21600
     recreateParams:
       timeoutSeconds: 600
-    resources: {}
     type: Recreate
   template:
     metadata:
       labels:
-        app: eap-example
-        application: eap-example
-        deploymentConfig: eap-example
+        app.kubernetes.io/instance: eap-example
+        app.kubernetes.io/name: eap-example
       name: eap-example
     spec:
       containers:
-        - args:
-            - agent
-            - '-log-level=debug'
-            - '-config=/vault/config/agent.config'
-          env:
-            - name: SKIP_SETCAP
-              value: 'true'
-            - name: VAULT_ADDR
-              value: 'https://vault.hashicorp-vault.svc:8200'
-            - name: VAULT_CAPATH
-              value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
-          image: 'vault:latest'
-          imagePullPolicy: Always
-          name: vault-agent
-          resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          volumeMounts:
-            - mountPath: /vault/config/agent.config
-              name: vault-config
-              subPath: agent.config
-            - mountPath: /var/run/secrets/vaultproject.io
-              name: vault-agent-volume
-        - args:
-            - start
-          env:
-            - name: LOG_LEVEL
-              value: DEBUG
-            - name: VAULT_ADDR
-              value: 'https://vault.hashicorp-vault.svc:8200'
-            - name: VAULT_CAPATH
-              value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
-            - name: VAULT_TOKEN
-              value: /var/run/secrets/vaultproject.io/token
-            - name: VAULT_SECRET
-              value: secret/example
-            - name: PROPERTIES_FILE
-              value: /var/run/secrets/vaultproject.io/application.yaml
-          image: openlabred/vault-secret-fetcher:v1.0.1
-          imagePullPolicy: Always
-          name: vault-secret-fetcher
-          resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          volumeMounts:
-            - mountPath: /var/run/secrets/vaultproject.io
-              name: vault-agent-volume
         - env:
             - name: JGROUPS_PING_PROTOCOL
               value: openshift.DNS_PING
@@ -192,9 +185,6 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 1
-          resources:
-            limits:
-              memory: 1Gi
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
@@ -202,33 +192,51 @@ spec:
               name: jboss-cli
             - mountPath: /var/run/secrets/vaultproject.io
               name: vault-agent-volume
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      terminationGracePeriodSeconds: 75
+        - image: vault:1.3.2
+          name: vault-agent
+          ports:
+          - containerPort: 8200
+            name: vaultport
+            protocol: TCP
+          args:
+          - agent
+          - -log-level=debug
+          - -config=/vault/config/agent.config
+          env:
+          - name: SKIP_SETCAP
+            value: 'true'
+          volumeMounts:
+          - mountPath: /vault/config
+            name: vault-config
+          - mountPath: /vault/ca
+            name: vault-cabundle
+          - mountPath: /var/run/secrets/vaultproject.io
+            name: vault-agent-volume
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 250m
+            limits:
+              memory: 256Mi
+              cpu: 250m
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/sh
+                - -c
+                - sleep 5 && kill -SIGTERM $(pidof vault)
       volumes:
-        - configMap:
-            defaultMode: 493
-            name: jboss-cli
+      - name: vault-agent-volume
+        emptyDir:
+          medium: Memory
+      - configMap:
+          name: vault-agent-config
+        name: vault-config
+      - configMap:
+          name: vault-agent-cabundle
+        name: vault-cabundle
+      - configMap:
+          defaultMode: 493
           name: jboss-cli
-        - emptyDir:
-            medium: Memory
-          name: vault-agent-volume
-        - configMap:
-            defaultMode: 420
-            items:
-              - key: vault-agent-config
-                path: agent.config
-            name: vault-agent-config
-          name: vault-config
-  triggers:
-    - imageChangeParams:
-        automatic: true
-        containerNames:
-          - eap-example
-        from:
-          kind: ImageStreamTag
-          name: 'eap-example:latest'
-      type: ImageChange
-    - type: ConfigChange
+        name: jboss-cli

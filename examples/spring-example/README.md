@@ -6,6 +6,7 @@
 ```
     oc project app
 
+    cd examples/spring-example
     oc new-build --name=spring-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/spring-example
     oc apply -f spring-example.yaml
 ```
@@ -16,6 +17,7 @@
 ```
 oc project app
 
+cd examples/spring-example
 oc new-build --name=spring-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/spring-example
 oc apply -f spring-inject.yaml
 ```
