@@ -1,0 +1,11 @@
+== lab 002 Vault simple operation
+
+=== Token authentication and policies
+
+
+=== Simple kv secret manipulation
+
+
+
+
+ 
