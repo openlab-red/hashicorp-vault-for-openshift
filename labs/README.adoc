@@ -12,7 +12,7 @@
 
 == Introduction and Lab Outline
 
-This lab walks you through the process of build  HashiCorp Vault in OpenShift.
+This lab walks you through the process of building HashiCorp Vault in OpenShift.
 Vault secures, stores, and tightly controls access to tokens, passwords, certificates, API keys, and other secrets in modern computing.
 Using Vault together with OpenShift/Kubernetes improves the security and flexibility of handling any kind of secrets,
 complementing and extending the built-in Kubernetes secret-handling capabilities.
@@ -125,7 +125,7 @@ If you logged in successfully, you should see this message;
 ----
 =================================================
 
-Welcome to the RHEL8 Gold Image for Azure Lab! FIXME
+Welcome to the secret management for microservices using Vault on OpenShift Lab!
 
 Please open the LAB documentation from the
 links provided before you get started, and
@@ -133,15 +133,11 @@ don't be afraid to ask for help if you need it!
 
 =================================================
 
-Web console: https://workstation-GUID.rhpds.opentlc.com:9090/ or
-https://10.0.0.3:9090/
+Web console: https://workstation-GUID.rhpds.opentlc.com:9090/ 
 
 Last login: Wed Apr 24 16:25:54 2019
 lab-user@workstation-GUID:
 ----
-
-[NOTE]
-The default prompt has been configured to use colors, just because it can be easier finding what you've typed when following lab instructions. This is not a normal RHEL8 feature and is just used in this lab. If you would like to remove the prompt colors, delete the `/etc/profile.d/profile.sh` file and login again.
 
 
 
