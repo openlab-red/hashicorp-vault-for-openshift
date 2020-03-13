@@ -22,8 +22,8 @@
 Exec the following command.
 
 ```
-export KEYS=60Lr2MnuPlmuKnFBoNgWWYjiUSdQ9NEkXpyFUsKnMKc=
-export ROOT_TOKEN=s.v4mWjWAPsf78LBV6LQ0DzVzM
+export KEYS=mbDmltRyjJm0k1IO4+L9n0CVeneTcnroCBEAI01NZR0=
+export ROOT_TOKEN=s.MtdEHrDEI64bIoTNA5q4EAJ6
 export VAULT_TOKEN=$ROOT_TOKEN
 
 JWT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
@@ -76,7 +76,7 @@ Sample output:
 ```
 Key                                       Value
 ---                                       -----
-token                                     s.Uq8cOrLAIFdFh4kxfkKpMicx
+token                                     s.mCgDQH1SvtWT2lxdiqO2dvHj
 token_accessor                            ZGqVZg8FMzA6mlBUufp894FK
 token_duration                            2h
 token_renewable                           true
@@ -93,7 +93,7 @@ token_meta_service_account_uid            4c69a1f8-fc93-4300-958c-04f349936431
 Read the secret:
 
 ```
-export VAULT_TOKEN=s.Uq8cOrLAIFdFh4kxfkKpMicx
+export VAULT_TOKEN=s.mCgDQH1SvtWT2lxdiqO2dvHj
 vault read --tls-skip-verify secret/example
 ```
 

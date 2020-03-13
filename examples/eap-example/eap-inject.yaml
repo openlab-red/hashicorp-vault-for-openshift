@@ -65,9 +65,9 @@ spec:
     metadata:
       annotations:
         sidecar.agent.vaultproject.io/inject: "true"
-        sidecar.agent.vaultproject.io/secret-key: secret/example
-        sidecar.agent.vaultproject.io/properties-ext: json
-        sidecar.agent.vaultproject.io/vault-role: example
+        sidecar.agent.vaultproject.io/secret: secret/example
+        sidecar.agent.vaultproject.io/filename: application.json
+        sidecar.agent.vaultproject.io/role: example
       labels:
         app: eap-example
         application: eap-example

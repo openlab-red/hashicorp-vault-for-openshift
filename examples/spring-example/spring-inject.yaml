@@ -51,8 +51,9 @@ spec:
     metadata:
       annotations:
         sidecar.agent.vaultproject.io/inject: "true"
-        sidecar.agent.vaultproject.io/secret-key: secret/example
-        sidecar.agent.vaultproject.io/vault-role: example
+        sidecar.agent.vaultproject.io/secret: secret/example
+        sidecar.agent.vaultproject.io/filename: application.yaml
+        sidecar.agent.vaultproject.io/role: example
       labels:
         app: spring-example
         deploymentconfig: spring-example
