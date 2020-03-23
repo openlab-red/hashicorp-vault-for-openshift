@@ -15,7 +15,7 @@ The following kubernetes components will be created:
 * vault ServiceAccount
 * vault-storage PersistentVolumeClaim with 10Gi size
 * vault-config ConfigMap
-* vault Serivce
+* vault Service
 * vault Deployment
 * vault Route
 * vault NetworkPolicy
