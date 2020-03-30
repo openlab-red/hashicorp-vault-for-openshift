@@ -25,8 +25,8 @@
 Exec the following command.
 
 ```
-export KEYS=mbDmltRyjJm0k1IO4+L9n0CVeneTcnroCBEAI01NZR0=
-export ROOT_TOKEN=s.MtdEHrDEI64bIoTNA5q4EAJ6
+export KEYS=vMIVXLRMgK3duZnjTbPQVerJKHzus+/EIsgbnYLajSk=
+export ROOT_TOKEN=s.dHqf2R7ql3gOOp9wDDkvZPkE
 export VAULT_TOKEN=$ROOT_TOKEN
 
 JWT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
