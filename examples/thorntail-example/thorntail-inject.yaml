@@ -53,11 +53,7 @@ spec:
         app: thorntail-example       
     spec:
       containers:
-        - args:
-            - '-s/var/run/secrets/vaultproject.io/application.yaml'
-          command:
-            - /opt/run-java/run/run-java.sh
-          name: thorntail-example
+        - name: thorntail-example
           image: "thorntail-example:latest"
           imagePullPolicy: Always
           livenessProbe:
