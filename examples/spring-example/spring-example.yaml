@@ -12,6 +12,7 @@ data:
       example:
         password: {{ .Data.password }}
     {{ end }}
+
   agent.config: |
 
     vault {
@@ -113,6 +114,35 @@ spec:
         app.kubernetes.io/instance: spring-example
         app.kubernetes.io/name: spring-example
     spec:
+      initContainers:
+      - image: vault:1.3.2
+        name: vault-agent-init
+        ports:
+        - containerPort: 8200
+          name: vaultport
+          protocol: TCP
+        args:
+        - agent
+        - -log-level=debug
+        - -config=/vault/config/agent.config
+        - -exit-after-auth
+        env:
+        - name: SKIP_SETCAP
+          value: 'true'
+        volumeMounts:
+        - mountPath: /vault/config
+          name: vault-config
+        - mountPath: /vault/ca
+          name: vault-cabundle
+        - mountPath: /var/run/secrets/vaultproject.io
+          name: vault-agent-volume
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 250m
+          limits:
+            memory: 256Mi
+            cpu: 250m  
       containers:
       - name: spring-example
         image: spring-example:latest

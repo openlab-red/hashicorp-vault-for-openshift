@@ -3,7 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: eap-example
+    app.kubernetes.io/instance: eap-example
+    app.kubernetes.io/name: eap-example
   name: eap-example
 spec:
   ports:
@@ -11,13 +12,15 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    app: eap-example
+    app.kubernetes.io/instance: eap-example
+    app.kubernetes.io/name: eap-example
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: eap-example
+    app.kubernetes.io/instance: eap-example
+    app.kubernetes.io/name: eap-example
   name: eap-example-ping
 spec:
   ports:
@@ -25,7 +28,8 @@ spec:
     protocol: TCP
     targetPort: 8888
   selector:
-    app: eap-example
+    app.kubernetes.io/instance: eap-example
+    app.kubernetes.io/name: eap-example
 ---
 
 
@@ -33,7 +37,8 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   labels:
-    app: eap-example
+    app.kubernetes.io/instance: eap-example
+    app.kubernetes.io/name: eap-example
   name: eap-example
 spec:
   to:
@@ -45,16 +50,15 @@ apiVersion: apps.openshift.io/v1
 kind: DeploymentConfig
 metadata:
   labels:
-    app: eap-example
-    application: eap-example
-    template: eap71-basic-s2i
-    xpaas: 1.4.12
+    app.kubernetes.io/instance: eap-example
+    app.kubernetes.io/name: eap-example
   name: eap-example
 spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
-    deploymentConfig: eap-example
+    app.kubernetes.io/instance: eap-example
+    app.kubernetes.io/name: eap-example
   strategy:
     activeDeadlineSeconds: 21600
     recreateParams:
@@ -66,12 +70,11 @@ spec:
       annotations:
         sidecar.agent.vaultproject.io/inject: "true"
         sidecar.agent.vaultproject.io/secret: secret/example
-        sidecar.agent.vaultproject.io/filename: application.json
+        sidecar.agent.vaultproject.io/filename: application.yaml
         sidecar.agent.vaultproject.io/role: example
       labels:
-        app: eap-example
-        application: eap-example
-        deploymentConfig: eap-example
+        app.kubernetes.io/instance: eap-example
+        app.kubernetes.io/name: eap-example
       name: eap-example
     spec:
       containers:
