@@ -35,9 +35,6 @@
         <groupId>io.thorntail</groupId>
         <artifactId>thorntail-maven-plugin</artifactId>
         <version>${version.thorntail}</version>
-        <configuration>
-          <mainClass>com.vault.demo.config.Main</mainClass>
-        </configuration>
         <executions>
           <execution>
             <goals>
