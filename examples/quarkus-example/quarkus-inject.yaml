@@ -52,9 +52,9 @@ spec:
       annotations:
         vault.hashicorp.com/agent-inject: 'true'
         vault.hashicorp.com/ca-key: '/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt'
-        vault.hashicorp.com/agent-inject-secret-application.yaml: secret/example
-        vault.hashicorp.com/secret-volume-path: /deployments/config/application.yaml
-        vault.hashicorp.com/agent-inject-template-application.yaml: |
+        vault.hashicorp.com/agent-inject-secret-application.properties: secret/example
+        vault.hashicorp.com/secret-volume-path: /deployments/config
+        vault.hashicorp.com/agent-inject-template-application.properties: |
           {{- with secret "secret/example" -}}
           secret.example.password = {{ .Data.password }}
           {{- end }}
