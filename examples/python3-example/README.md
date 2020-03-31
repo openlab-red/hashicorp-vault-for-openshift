@@ -5,7 +5,7 @@
 ```
 oc new-project app
 
-oc new-app python:3.6~https://github.com/rflorenc/hashicorp-vault-for-openshift#py-example --context-dir=examples/python3-example/
+oc new-app --name=python3-example python:3.6~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=examples/python3-example/
 ```
 
 ## Deploy
