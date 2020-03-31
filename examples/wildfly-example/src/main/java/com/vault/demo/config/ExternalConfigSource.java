@@ -54,25 +54,19 @@ public class ExternalConfigSource implements ConfigSource {
 
     public String read(){
 
-        if(configSource != null) {
-            return configSource;
+        if(Objects.isNull(configSource)) {
+            this.configSource = ConfigProvider.getConfig().getValue(CONFIG_PROPERTY_PATH, String.class);
         }
-
-        final Config cfg = ConfigProvider.getConfig();
-        return configSource = cfg.getValue(CONFIG_PROPERTY_PATH, String.class);
+        return this.configSource;
     }
 
     public Properties load() {
         Properties properties = new Properties();
         try(InputStream in = new FileInputStream(read())){
-            
-            properties.load( in );
+            properties.load(in);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return properties;
-
     }
-
-
 }
