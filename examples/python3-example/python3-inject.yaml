@@ -3,7 +3,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: python3-example
+    app.kubernetes.io/instance: python3-example
+    app.kubernetes.io/name: python3-example
   name: python3-example
 spec:
   ports:
@@ -11,14 +12,16 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    app: python3-example
+    app.kubernetes.io/instance: python3-example
+    app.kubernetes.io/name: python3-example
 
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   labels:
-    app: python3-example
+    app.kubernetes.io/instance: python3-example
+    app.kubernetes.io/name: python3-example
   name: python3-example
 spec:
   to:
@@ -26,11 +29,12 @@ spec:
     name: python3-example
 
 ---
-apiVersion: apps.openshift.io/v1
+apiVersion: v1
 kind: DeploymentConfig
 metadata:
   labels:
-    app: python3-example
+    app.kubernetes.io/instance: python3-example
+    app.kubernetes.io/name: python3-example
   name: python3-example
 spec:
   triggers:
@@ -44,47 +48,57 @@ spec:
           kind: ImageStreamTag
           name: 'python3-example:latest'
   replicas: 1
-  selector:
-    app: python3-example
-    deploymentconfig: python3-example
   template:
     metadata:
       annotations:
-        sidecar.agent.vaultproject.io/inject: "true"
-        sidecar.agent.vaultproject.io/secret: secret/example
-        sidecar.agent.vaultproject.io/filename: application.yaml
-        sidecar.agent.vaultproject.io/role: example
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/ca-key: '/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt'
+        vault.hashicorp.com/agent-inject-secret-application.yaml: secret/example
+        vault.hashicorp.com/agent-inject-template-application.yaml: |
+          {{- with secret "secret/example" -}}
+          secret:
+            example:
+              password: {{ .Data.password }}
+          {{- end }}
+        vault.hashicorp.com/role: example
       labels:
-        app: python3-example
-        deploymentconfig: python3-example
+        app.kubernetes.io/instance: python3-example
+        app.kubernetes.io/name: python3-example
     spec:
       containers:
-      - env:
-        - name: PYTHON3_CONFIG_ADDITIONAL_LOCATION
-          value: /var/run/secrets/vaultproject.io/application.yaml
-        image: python3-example:latest
+      - name: python3-example
+        image: python3:latest
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
-            path: /actuator/health
+            path: /healthz
             port: 8080
-          initialDelaySeconds: 60
+          initialDelaySeconds: 30
           periodSeconds: 3
         readinessProbe:
           httpGet:
-            path: /actuator/health
+            path: /healthz
             port: 8080
-          initialDelaySeconds: 60
+          initialDelaySeconds: 30
           periodSeconds: 3
-        name: python3-example
-        ports:
-        - containerPort: 8080
-          protocol: TCP
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      terminationGracePeriodSeconds: 30
+        env:
+        - name: PYTHON3_CONFIG_LOCATION
+          value: /vault/secrets/application.yaml
+        volumeMounts:
+        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount/ca-bundle
+          name: vault-cabundle
+      volumes:
+      - configMap:
+          name: vault-agent-cabundle
+        name: vault-cabundle
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vault-agent-cabundle
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+data: {}

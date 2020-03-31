@@ -3,7 +3,7 @@
 ## Build the Application
 
 ```
-oc new-project pyvault
+oc new-project app
 
 oc new-app python:3.6~https://github.com/rflorenc/hashicorp-vault-for-openshift#py-example --context-dir=examples/python3-example/
 ```
