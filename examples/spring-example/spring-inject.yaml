@@ -53,10 +53,16 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.agent.vaultproject.io/inject: "true"
-        sidecar.agent.vaultproject.io/secret: secret/example
-        sidecar.agent.vaultproject.io/filename: application.yaml
-        sidecar.agent.vaultproject.io/role: example
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/ca-key: '/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt'
+        vault.hashicorp.com/agent-inject-secret-application.yaml: secret/example
+        vault.hashicorp.com/agent-inject-template-application.yaml: |
+          {{- with secret "secret/example" -}}
+          secret:
+            example:
+              password: {{ .Data.password }}
+          {{- end }}
+        vault.hashicorp.com/role: example
       labels:
         app: spring-example
         deploymentconfig: spring-example
@@ -64,7 +70,7 @@ spec:
       containers:
       - env:
         - name: SPRING_CONFIG_ADDITIONAL_LOCATION
-          value: /var/run/secrets/vaultproject.io/application.yaml
+          value: /vault/secrets/application.yaml
         image: spring-example:latest
         imagePullPolicy: Always
         livenessProbe:
@@ -86,8 +92,27 @@ spec:
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount/ca-bundle
+          name: vault-cabundle
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          name: vault-agent-cabundle
+        name: vault-cabundle
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vault-agent-cabundle
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+data: {}

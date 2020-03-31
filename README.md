@@ -248,12 +248,13 @@ Using **Agent Vault** as sidecar containers
 ### [Spring Example](examples/spring-example/README.md)
 ### [Thorntail Example](examples/thorntail-example/README.md)
 ### [EAP Example](examples/eap-example/README.md)
+### [Python Example](examples/python3-example/README.md)
 
-# Mutating Webhook Configuration
+# Vault Injector Mutating Webhook Configuration
 
-1. Configure Mutating WebHook
+1. Vault Injector Mutating Webhook Installation
 
-    Follow the setup instruction from [Mutating Webhook Configuration ](https://github.com/openlab-red/mutating-webhook-vault-agent)
+    [Installation](vault/injector/README.md)
 
 2. Enable the vault webhook for the **app** project
 
@@ -264,10 +265,13 @@ Using **Agent Vault** as sidecar containers
 ### [Spring Example](examples/spring-example/README.md)
 ### [Thorntail Example](examples/thorntail-example/README.md)
 ### [EAP Example](examples/eap-example/README.md)
+### [Python Example](examples/python3-example/README.md)
 
 # References
 
 * https://www.vaultproject.io/docs/agent/template/index.html
+* https://github.com/hashicorp/vault-k8s
+* https://www.vaultproject.io/docs/platform/k8s/injector/
 * https://github.com/raffaelespazzoli/credscontroller
 * https://blog.openshift.com/managing-secrets-openshift-vault-integration/
 * https://blog.openshift.com/vault-integration-using-kubernetes-authentication-method

@@ -68,10 +68,14 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.agent.vaultproject.io/inject: "true"
-        sidecar.agent.vaultproject.io/secret: secret/example
-        sidecar.agent.vaultproject.io/filename: application.yaml
-        sidecar.agent.vaultproject.io/role: example
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/ca-key: '/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt'
+        vault.hashicorp.com/agent-inject-secret-application.properties: secret/example
+        vault.hashicorp.com/agent-inject-template-application.properties: |
+          {{- with secret "secret/example" -}}
+          secret.example.password: {{ .Data.password }}
+          {{- end }}
+        vault.hashicorp.com/role: example
       labels:
         app.kubernetes.io/instance: eap-example
         app.kubernetes.io/name: eap-example
@@ -135,6 +139,8 @@ spec:
           volumeMounts:
             - mountPath: /opt/eap/extensions
               name: jboss-cli
+            - mountPath: /var/run/secrets/kubernetes.io/serviceaccount/ca-bundle
+              name: vault-cabundle
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -145,6 +151,9 @@ spec:
             defaultMode: 493
             name: jboss-cli
           name: jboss-cli
+        - configMap:
+            name: vault-agent-cabundle
+          name: vault-cabundle
   triggers:
     - imageChangeParams:
         automatic: true
@@ -155,3 +164,15 @@ spec:
           name: 'eap-example:latest'
       type: ImageChange
     - type: ConfigChange
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vault-agent-cabundle
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+data: {}
