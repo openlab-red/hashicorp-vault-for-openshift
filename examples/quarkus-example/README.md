@@ -8,12 +8,6 @@
     ```
 
 ## Deploy
- 
-### Manual Sidecar Container
-
-```
-    oc apply -f examples/quarkus-example/quarkus-example.yaml
-```
 
 ### Mutating Webhook Configuration
 
