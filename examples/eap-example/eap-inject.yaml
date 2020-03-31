@@ -99,17 +99,6 @@ spec:
               value: 'false'
           image: eap-example
           imagePullPolicy: Always
-          livenessProbe:
-            exec:
-              command:
-                - /bin/bash
-                - '-c'
-                - /opt/eap/bin/livenessProbe.sh
-            failureThreshold: 3
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 1
           name: eap-example
           ports:
             - containerPort: 8778
