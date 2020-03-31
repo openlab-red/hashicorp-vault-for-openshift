@@ -1,5 +1,0 @@
-<module xmlns="urn:jboss:module:1.1" name="vaultproject.io">
-    <resources>
-        <resource-root path="properties"/>
-    </resources>
-</module>

@@ -7,11 +7,9 @@ metadata:
     app.kubernetes.io/name: vault-agent
 data:
   template.ctmpl: |
-    {{ with secret "secret/example" }}
-    secret:
-      example:
-        password: {{ .Data.password }}
-    {{ end }}
+    {{- with secret "secret/example" -}}
+    secret.example.password: {{ .Data.password }}
+    {{- end }}
   agent.config: |
 
     vault {
@@ -42,7 +40,7 @@ data:
 
     template {
         source      = "/vault/config/template.ctmpl"
-        destination = "/var/run/secrets/vaultproject.io/application.yaml"
+        destination = "/var/run/secrets/vaultproject.io/application.properties"
     }
 
 ---
