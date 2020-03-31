@@ -12,49 +12,28 @@ import java.util.*;
 
 public class ExternalConfigSource implements ConfigSource {
 
-    private final String FILE_CONFIG_PROPERTY = "com.vault.demo.config.path";
+    private final String CONFIG_PROPERTY_PATH = "com.vault.demo.config.path";
     private final String CONFIG_SOURCE_NAME = "ExternalConfigSource";
     private final int ORDINAL = 300;
 
-    private String fileConfig;
+    private String configSource;
 
     @Override
     public Map<String, String> getProperties() {
 
-        try(InputStream in = new FileInputStream( readPath() )){
+        final Map<String, String> map = new HashMap<>();
+        final Properties load = load();
 
-            Properties properties = new Properties();
-            properties.load( in );
+        load.stringPropertyNames()
+                .stream()
+                .forEach(key-> map.put(key, load.getProperty(key)));
 
-            Map<String, String> map = new HashMap<>();
-            properties.stringPropertyNames()
-                    .stream()
-                    .forEach(key-> map.put(key, properties.getProperty(key)));
-
-            return map;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return map;
     }
 
     @Override
     public Set<String> getPropertyNames() {
-
-        try(InputStream in = new FileInputStream( readPath() )){
-
-            Properties properties = new Properties();
-            properties.load( in );
-
-            return properties.stringPropertyNames();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return load().stringPropertyNames();
     }
 
     @Override
@@ -64,19 +43,7 @@ public class ExternalConfigSource implements ConfigSource {
 
     @Override
     public String getValue(String s) {
-
-        try(InputStream in = new FileInputStream( readPath() )){
-
-            Properties properties = new Properties();
-            properties.load( in );
-
-            return properties.getProperty(s);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return load().getProperty(s);
     }
 
     @Override
@@ -85,14 +52,27 @@ public class ExternalConfigSource implements ConfigSource {
     }
 
 
-    public String readPath(){
+    public String read(){
 
-        if(Objects.nonNull(fileConfig)){
-            return fileConfig;
+        if(configSource != null) {
+            return configSource;
         }
 
         final Config cfg = ConfigProvider.getConfig();
-        return fileConfig = cfg.getValue(FILE_CONFIG_PROPERTY, String.class);
+        return configSource = cfg.getValue(CONFIG_PROPERTY_PATH, String.class);
     }
+
+    public Properties load() {
+        Properties properties = new Properties();
+        try(InputStream in = new FileInputStream(read())){
+            
+            properties.load( in );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return properties;
+
+    }
+
 
 }

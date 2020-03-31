@@ -1,15 +1,22 @@
-# mp-config-example
+# Wildfly MicroProfile Example 
 
-This project contains a Web application which uses Eclipse Microprofile Config API to read its configuration.
+## Build the Application
 
-# Instructions
+1. Build    
+    ```
+        oc new-build --name=wildfly-example registry.redhat.io/jboss-eap-7/eap72-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/wildfly-example 
+    ```
 
-To run the example, you need:
+## Deploy
+ 
+### Manual Sidecar Container
 
-````
-mvn clean package deploy
-````
+```
+    oc apply -f examples/wildfly-example/wildfly-example.yaml
+```
 
-* Go to [http://localhost:8080/mp-config-example](http://localhost:8080/mp-config-example) to access the Servlet link 
+### Mutating Webhook Configuration
 
-
+```
+    oc apply -f examples/wildfly-example/wildfly-inject.yaml
+```
