@@ -1,0 +1,11 @@
+batch
+
+embed-server --server-config=standalone-openshift.xml
+
+/subsystem=ee:write-attribute(name=annotation-property-replacement,value=true)
+
+/subsystem=ee:write-attribute(name=jboss-descriptor-property-replacement,value=true)
+
+run-batch
+
+:reload

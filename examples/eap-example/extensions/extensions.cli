@@ -6,9 +6,7 @@ embed-server --server-config=standalone-openshift.xml
 
 /subsystem=ee:write-attribute(name=jboss-descriptor-property-replacement,value=true)
 
-/subsystem=ee:write-attribute(name=global-modules, value=[{"name"=>"vaultproject.io","slot"=>"main"}])
-
-/system-property=application:add(value=/var/run/secrets/vaultproject.io/application.yaml)
+/system-property=application:add(value=/vault/secrets/application.properties)
 
 run-batch
 

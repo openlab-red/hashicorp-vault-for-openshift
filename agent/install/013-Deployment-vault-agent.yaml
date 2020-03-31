@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
+  name: vault-agent
+spec:
+  replicas: 1
+  selector:
+      matchLabels:
+        app.kubernetes.io/instance: vault-agent
+        app.kubernetes.io/name: vault-agent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: vault-agent
+        app.kubernetes.io/name: vault-agent
+    spec:
+      containers:
+      - image: vault:1.3.2
+        name: vault-agent
+        ports:
+        - containerPort: 8200
+          name: vaultport
+          protocol: TCP
+        args:
+        - agent
+        - -log-level=debug
+        - -config=/vault/config/agent.config
+        env:
+        - name: SKIP_SETCAP
+          value: 'true'
+        volumeMounts:
+        - mountPath: /vault/config
+          name: vault-config
+        - mountPath: /vault/ca
+          name: vault-cabundle
+        - mountPath: /var/run/secrets/vaultproject.io
+          name: vault-agent-volume
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 250m
+          limits:
+            memory: 256Mi
+            cpu: 250m
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - sleep 5 && kill -SIGTERM $(pidof vault)
+      volumes:
+      - name: vault-agent-volume
+        emptyDir:
+          medium: Memory
+      - configMap:
+          name: vault-agent-config
+        name: vault-config
+      - configMap:
+          name: vault-agent-cabundle
+        name: vault-cabundle

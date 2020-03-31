@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault-agent
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
+spec:
+  ports:
+  - name: vault
+    port: 8200
+  selector:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent

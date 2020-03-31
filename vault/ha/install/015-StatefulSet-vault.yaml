@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/instance: vault
+    app.kubernetes.io/name: vault
+  name: vault
+  namespace: hashicorp
+spec:
+  podManagementPolicy: Parallel
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: vault
+      app.kubernetes.io/name: vault
+  serviceName: vault
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: vault
+        app.kubernetes.io/name: vault
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: vault
+                app.kubernetes.io/name: vault
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - args:
+        - "sed -E \"s/HOST_IP/${HOST_IP?}/g\" /vault/config/extraconfig-from-values.hcl
+          > /tmp/storageconfig.hcl;\nsed -Ei \"s/POD_IP/${POD_IP?}/g\" /tmp/storageconfig.hcl;\n/usr/local/bin/docker-entrypoint.sh
+          vault server -config=/tmp/storageconfig.hcl \n"
+        command:
+        - /bin/sh
+        - -ec
+        env:
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: VAULT_ADDR
+          value: http://127.0.0.1:8200
+        - name: VAULT_API_ADDR
+          value: http://$(POD_IP):8200
+        - name: SKIP_CHOWN
+          value: "true"
+        - name: SKIP_SETCAP
+          value: "true"
+        image: vault:1.3.2
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - sleep 5 && kill -SIGTERM $(pidof vault)
+        name: vault
+        ports:
+        - containerPort: 8200
+          name: http
+          protocol: TCP
+        - containerPort: 8201
+          name: internal
+          protocol: TCP
+        - containerPort: 8202
+          name: replication
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -ec
+            - vault status -tls-skip-verify
+          failureThreshold: 2
+          initialDelaySeconds: 5
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 250m
+          limits:
+            memory: 256Mi
+            cpu: 250m
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /vault/config
+          name: config
+        - mountPath: /var/run/secrets/kubernetes.io/certs
+          name: cert
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      serviceAccount: vault
+      serviceAccountName: vault
+      volumes:
+      - configMap:
+          name: vault-config
+        name: config
+      - name: cert
+        secret:
+          secretName: vault-cert
+  updateStrategy:
+    type: OnDelete

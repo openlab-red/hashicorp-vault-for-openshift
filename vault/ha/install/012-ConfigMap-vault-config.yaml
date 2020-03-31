@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/instance: vault
+  name: vault-config
+  namespace: hashicorp
+data:
+  extraconfig-from-values.hcl: |-
+    disable_mlock = true
+    ui = true
+
+    listener "tcp" {
+      address = "[::]:8200"
+      cluster_address = "[::]:8201"
+      tls_cert_file = "/var/run/secrets/kubernetes.io/certs/tls.crt"
+      tls_key_file = "/var/run/secrets/kubernetes.io/certs/tls.key"
+    }
+    storage "consul" {
+      path = "vault"
+      address = "consul-consul-server:8500"
+    }

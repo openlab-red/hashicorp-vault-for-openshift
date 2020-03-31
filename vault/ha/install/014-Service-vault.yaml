@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.alpha.openshift.io/serving-cert-secret-name: vault-cert
+  labels:
+    app.kubernetes.io/instance: vault
+    app.kubernetes.io/name: vault
+  name: vault
+  namespace: hashicorp
+spec:
+  ports:
+  - name: http
+    port: 8200
+    protocol: TCP
+    targetPort: 8200
+  - name: internal
+    port: 8201
+    protocol: TCP
+    targetPort: 8201
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/instance: vault
+    app.kubernetes.io/name: vault
+    component: server
+  sessionAffinity: None
+  type: ClusterIP

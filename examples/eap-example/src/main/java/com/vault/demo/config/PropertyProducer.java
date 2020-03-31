@@ -61,28 +61,10 @@ public class PropertyProducer {
                 watchPath(path);
             }
 
-
-            Yaml yaml = new Yaml();
-            Map<String, LinkedHashMap> data = yaml.load(Files.newInputStream(path));
-
-            data.forEach((k, v) -> {
-                navigate(new StringBuilder(k), v, properties);
-            });
+            this.properties.load(Files.newInputStream(path));
 
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-
-    }
-
-    private void navigate(StringBuilder sb, LinkedHashMap<String, ?> map, Properties properties) {
-        for (Map.Entry<String, ?> entry : map.entrySet()) {
-            sb.append(".").append(entry.getKey());
-            if (entry.getValue().getClass().equals(String.class)) {
-                properties.put(sb.toString(), String.valueOf(entry.getValue()));
-            } else {
-                navigate(sb, (LinkedHashMap<String, ?>) entry.getValue(), properties);
-            }
         }
 
     }

@@ -1,9 +1,25 @@
-apiVersion: v1
 kind: ConfigMap
+apiVersion: v1
 metadata:
   name: vault-agent-config
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
 data:
-  vault-agent-config: |-
+  template.ctmpl: |
+    {{ with secret "secret/example" }}
+    secret:
+      example:
+        password: {{ .Data.password }}
+    {{ end }}
+
+  agent.config: |
+
+    vault {
+        ca_path = "/vault/ca/service-ca.crt"
+        address = "https://vault.hashicorp.svc.cluster.local:8200"
+    }
+
     pid_file = "/var/run/secrets/vaultproject.io/pid"
 
     auto_auth {
@@ -22,14 +38,33 @@ data:
                             path = "/var/run/secrets/vaultproject.io/token"
                     }
             }
+
     }
+
+    template {
+        source      = "/vault/config/template.ctmpl"
+        destination = "/var/run/secrets/vaultproject.io/application.yaml"
+    }
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vault-agent-cabundle
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+data: {}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: spring-example
+    app.kubernetes.io/instance: spring-example
+    app.kubernetes.io/name: spring-example
   name: spring-example
 spec:
   ports:
@@ -37,24 +72,29 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    app: spring-example
----
+    app.kubernetes.io/instance: spring-example
+    app.kubernetes.io/name: spring-example
 
+---
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   labels:
-    app: spring-example
+    app.kubernetes.io/instance: spring-example
+    app.kubernetes.io/name: spring-example
   name: spring-example
 spec:
   to:
     kind: Service
     name: spring-example
----
 
+---
 apiVersion: v1
 kind: DeploymentConfig
 metadata:
+  labels:
+    app.kubernetes.io/instance: spring-example
+    app.kubernetes.io/name: spring-example
   name: spring-example
 spec:
   triggers:
@@ -71,80 +111,101 @@ spec:
   template:
     metadata:
       labels:
-        app: spring-example       
+        app.kubernetes.io/instance: spring-example
+        app.kubernetes.io/name: spring-example
     spec:
+      initContainers:
+      - image: vault:1.3.2
+        name: vault-agent-init
+        ports:
+        - containerPort: 8200
+          name: vaultport
+          protocol: TCP
+        args:
+        - agent
+        - -log-level=debug
+        - -config=/vault/config/agent.config
+        - -exit-after-auth
+        env:
+        - name: SKIP_SETCAP
+          value: 'true'
+        volumeMounts:
+        - mountPath: /vault/config
+          name: vault-config
+        - mountPath: /vault/ca
+          name: vault-cabundle
+        - mountPath: /var/run/secrets/vaultproject.io
+          name: vault-agent-volume
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 250m
+          limits:
+            memory: 256Mi
+            cpu: 250m  
       containers:
-        - name: spring-example
-          image: spring-example:latest
-          imagePullPolicy: Always
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 3
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 3
-          env:
-          - name: SPRING_CONFIG_LOCATION
-            value: /var/run/secrets/vaultproject.io/application.yaml
-          volumeMounts:
-          - mountPath: /var/run/secrets/vaultproject.io
-            name: vault-agent-volume
-        - image: vault:latest
-          name: vault-agent
-          args:
-          - agent
-          - -log-level=debug
-          - -config=/vault/config/agent.config
-          env:
-          - name: SKIP_SETCAP
-            value: 'true'
-          - name: VAULT_ADDR
-            value: https://vault.hashicorp-vault.svc:8200
-          - name: VAULT_CAPATH
-            value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
-          volumeMounts:
-          - mountPath: /vault/config/agent.config
-            subPath: agent.config
-            name: vault-config
-          - mountPath: /var/run/secrets/vaultproject.io
-            name: vault-agent-volume
-        - image: openlabred/vault-secret-fetcher:v1.0.1
-          name: vault-secret-fetcher
-          args:
-            - start
-          env:
-            - name: LOG_LEVEL
-              value: 'DEBUG'
-            - name: VAULT_ADDR
-              value: https://vault.hashicorp-vault.svc:8200
-            - name: VAULT_CAPATH
-              value: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
-            - name: VAULT_TOKEN
-              value: /var/run/secrets/vaultproject.io/token
-            - name: VAULT_SECRET
-              value: secret/example
-            - name: PROPERTIES_FILE
-              value: /var/run/secrets/vaultproject.io/application.yaml
-          imagePullPolicy: Always
-          resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          volumeMounts:
-            - mountPath: /var/run/secrets/vaultproject.io
-              name: vault-agent-volume
+      - name: spring-example
+        image: spring-example:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 3
+        env:
+        - name: SPRING_CONFIG_LOCATION
+          value: /var/run/secrets/vaultproject.io/application.yaml
+        volumeMounts:
+        - mountPath: /var/run/secrets/vaultproject.io
+          name: vault-agent-volume
+      - image: vault:1.3.2
+        name: vault-agent
+        ports:
+        - containerPort: 8200
+          name: vaultport
+          protocol: TCP
+        args:
+        - agent
+        - -log-level=debug
+        - -config=/vault/config/agent.config
+        env:
+        - name: SKIP_SETCAP
+          value: 'true'
+        volumeMounts:
+        - mountPath: /vault/config
+          name: vault-config
+        - mountPath: /vault/ca
+          name: vault-cabundle
+        - mountPath: /var/run/secrets/vaultproject.io
+          name: vault-agent-volume
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 250m
+          limits:
+            memory: 256Mi
+            cpu: 250m
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - sleep 5 && kill -SIGTERM $(pidof vault)
       volumes:
       - name: vault-agent-volume
         emptyDir:
           medium: Memory
       - configMap:
-          items:
-            - key: vault-agent-config
-              path: agent.config
           name: vault-agent-config
         name: vault-config
+      - configMap:
+          name: vault-agent-cabundle
+        name: vault-cabundle

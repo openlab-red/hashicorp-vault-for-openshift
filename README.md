@@ -2,125 +2,75 @@
 
 ## Deploy Vault on OpenShift
 
-```
-oc new-project hashicorp-vault
+### [Standalone Deployment](https://github.com/openlab-red/hashicorp-vault-for-openshift/blob/rh-summit-2020/vault/standalone/README.md)
 
-oc create configmap vault-config --from-file=vault-config=./vault/vault-config.json
-oc get cm vault-config -o yaml
+### [High Availability Deployment](https://github.com/openlab-red/hashicorp-vault-for-openshift/blob/rh-summit-2020/vault/ha/README.md)
 
-oc create -f ./vault/vault.yaml
-oc create route reencrypt vault --port=8200 --service=vault
-```
+### [Project diagram](https://raw.githubusercontent.com/openlab-red/hashicorp-vault-for-openshift/rh-summit-2020/labs/lab001/diagrams/project_graph.gif)
 
-## Initialize Vault
-
-```
-export VAULT_ADDR=https://$(oc get route vault --no-headers -o custom-columns=HOST:.spec.host)
-echo $VAULT_ADDR
-
-vault operator init -tls-skip-verify -key-shares=1 -key-threshold=1
-```
-
-Save the `Unseal Key 1` and the `Initial Root Token`:
-
-```
-Unseal Key 1: NRvJGYdLeUc9emtX+eWJfa+JV7I0wzLb2lTlOcK5lmU=
-Initial Root Token: 4Zh3yRX5orXFqdQUXdKrNxmg
-```
-
-And export them as environment variables, for further use:
-
-```
-export KEYS=NRvJGYdLeUc9emtX+eWJfa+JV7I0wzLb2lTlOcK5lmU=
-export ROOT_TOKEN=4Zh3yRX5orXFqdQUXdKrNxmg
-export VAULT_TOKEN=$ROOT_TOKEN
-```
-
-## Unseal Vault
-
-```
-vault operator unseal -tls-skip-verify $KEYS
-```
 
 ## Configure Kubernetes Auth with the Vault
 
-```
-oc create sa vault-auth
-oc adm policy add-cluster-role-to-user system:auth-delegator system:serviceaccount:hashicorp-vault:vault-auth
-reviewer_service_account_jwt=$(oc serviceaccounts get-token vault-auth)
+* Standalone
+    ```
+    POD=$(oc get pods -lapp.kubernetes.io/name=vault --no-headers -o custom-columns=NAME:.metadata.name)
+    oc rsh $POD
+    ```
 
-pod=$(oc get pods -lapp=vault --no-headers -o custom-columns=NAME:.metadata.name)
-oc exec $pod -- cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt > /tmp/ca.crt
+* HA
+    ```
+    oc rsh vault-0
+    ```
 
-vault auth enable -tls-skip-verify kubernetes
-
-export OPENSHIFT_HOST=https://openshift-master.openlab.red
-
-vault write -tls-skip-verify auth/kubernetes/config token_reviewer_jwt=$reviewer_service_account_jwt kubernetes_host=$OPENSHIFT_HOST kubernetes_ca_cert=@/tmp/ca.crt
-```
-
-## Sample Policy
+Exec the following command.
 
 ```
-vault policy write -tls-skip-verify policy-example policy/policy-example.hcl
+export KEYS=vMIVXLRMgK3duZnjTbPQVerJKHzus+/EIsgbnYLajSk=
+export ROOT_TOKEN=s.dHqf2R7ql3gOOp9wDDkvZPkE
+export VAULT_TOKEN=$ROOT_TOKEN
+
+JWT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+KUBERNETES_HOST=https://${KUBERNETES_PORT_443_TCP_ADDR}:443
+
+vault auth enable --tls-skip-verify kubernetes
+vault write --tls-skip-verify auth/kubernetes/config token_reviewer_jwt=$JWT kubernetes_host=$KUBERNETES_HOST kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
 ```
 
-## Authorisation
+## Use Vault from your local
 
 ```
-vault write -tls-skip-verify auth/kubernetes/role/example \
+export VAULT_ADDR=https://$(oc get route vault --no-headers -o custom-columns=HOST:.spec.host)
+```
+
+### Sample Policy
+
+```
+vault policy write --tls-skip-verify policy-example policy/policy-example.hcl
+```
+
+### Authorisation
+
+```
+vault write --tls-skip-verify auth/kubernetes/role/example \
     bound_service_account_names=default bound_service_account_namespaces='app' \
     policies=policy-example \
     ttl=2h
 ```
 
-## Write Sample Data
+### Write Sample Data
 
 ```
-vault write -tls-skip-verify secret/example password=pwd
+vault secrets enable --tls-skip-verify -path=secret kv
+vault write --tls-skip-verify  secret/example password=pwd
 ```
 
-## Expose Vault to Other OpenShift Projects/Client Applications
-
-### With SDN Multi Tenant
-
-```
-oc adm  pod-network make-projects-global hashicorp-vault
-```
-
-### With SDN Network Policy
-
-```yml
-apiVersion: extensions/v1beta1
-kind: NetworkPolicy
-metadata:
-  name: allow-vault
-spec:
-  ingress:
-  - from:
-    - namespaceSelector: {}
-    ports:
-    - port: 8200
-      protocol: TCP
-  podSelector:
-    matchLabels:
-      app: vault
-  policyTypes:
-  - Ingress
-```
-
-```
-oc apply -f vault/app-allow-vault.yaml
-```
-
-
-## Test Vault Client
+### Test Vault Client
 
 ```
 oc new-project app
 
-default_account_token=$(oc sa get-token default -n app)
-vault write -tls-skip-verify auth/kubernetes/login role=example jwt=${default_account_token}
+JWT=$(oc sa get-token default -n app)
+vault write --tls-skip-verify auth/kubernetes/login role=example jwt=${JWT}
 
 ```
 
@@ -129,30 +79,30 @@ Sample output:
 ```
 Key                                       Value
 ---                                       -----
-token                                     wLflBsnHbEfJSsKYIdLVLrnx
-token_accessor                            1z2BrfAgEIFZGs8VrKJTpbUh
+token                                     s.mCgDQH1SvtWT2lxdiqO2dvHj
+token_accessor                            ZGqVZg8FMzA6mlBUufp894FK
 token_duration                            2h
 token_renewable                           true
 token_policies                            ["default" "policy-example"]
 identity_policies                         []
 policies                                  ["default" "policy-example"]
-token_meta_service_account_namespace      app
-token_meta_service_account_secret_name    default-token-s275r
-token_meta_service_account_uid            b971fe8c-cbb9-11e8-9913-2687f436e2c4
 token_meta_role                           example
 token_meta_service_account_name           default
+token_meta_service_account_namespace      app
+token_meta_service_account_secret_name    default-token-v8fjh
+token_meta_service_account_uid            4c69a1f8-fc93-4300-958c-04f349936431
 ```
 
 Read the secret:
 
 ```
-export VAULT_TOKEN=wLflBsnHbEfJSsKYIdLVLrnx
-vault read -tls-skip-verify secret/example
+export VAULT_TOKEN=s.mCgDQH1SvtWT2lxdiqO2dvHj
+vault read --tls-skip-verify secret/example
 ```
 
-## Vault Database secret
+### Vault Database secret
 
-### Deploy postgresql
+#### Deploy postgresql
 
 ```
 oc new-app postgresql-persistent \
@@ -163,16 +113,16 @@ oc new-app postgresql-persistent \
     --env POSTGRESQL_ADMIN_PASSWORD=postgres 
 ```
 
-### Enable datatabase secret in vault
+#### Enable datatabase secret in vault
 
 ```
-vault secrets enable -tls-skip-verify database
+vault secrets enable database
 ```
 
-### Install postgresql plugin
+#### Install postgresql plugin
 
 ```
-vault write -tls-skip-verify database/config/postgresql \
+vault write --tls-skip-verify database/config/postgresql \
     plugin_name=postgresql-database-plugin \
     allowed_roles="pg-readwrite" \
     connection_url="postgresql://{{username}}:{{password}}@postgresql.app.svc:5432/sampledb?sslmode=disable" \
@@ -180,11 +130,11 @@ vault write -tls-skip-verify database/config/postgresql \
     password="postgres" 
 ```
 
-### Role mapping
+#### Role mapping
 
 ```
 
-vault write -tls-skip-verify database/roles/pg-readwrite \
+vault write --tls-skip-verify database/roles/pg-readwrite \
     db_name=postgresql \
     creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
         GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
@@ -193,29 +143,29 @@ vault write -tls-skip-verify database/roles/pg-readwrite \
 
 ```
     
-### Sample Policy
+#### Sample Policy
 
 The policy contains both secret/example path and database/creds/pg-readwrite
 
 ```
-vault policy write -tls-skip-verify pg-readwrite policy/policy-database.hcl 
+vault policy write --tls-skip-verify pg-readwrite policy/policy-database.hcl 
 ```
 
 
-### Authorisation
+#### Authorisation
 
 ```
-vault write -tls-skip-verify auth/kubernetes/role/example \
+vault write --tls-skip-verify auth/kubernetes/role/example \
     bound_service_account_names=default bound_service_account_namespaces='app' \
     policies=pg-readwrite \
     ttl=2h 
 ```
 
 
-### Read credentials
+#### Read credentials
 
 ```
-vault read -tls-skip-verify database/creds/pg-readwrite
+vault read --tls-skip-verify database/creds/pg-readwrite
 
 ```
 
@@ -245,13 +195,13 @@ postgres=# \du
  v-root-pg-readw-57OZENOr1AYEhqt3n4xY-1541144444 | Password valid until 2018-11-02 08:40:49+00                | {}
 ```
 
-### Test Vault Client
+#### Test Vault Client
 
 ```
 oc project app
 
-default_account_token=$(oc sa get-token default -n app)
-vault write -tls-skip-verify auth/kubernetes/login role=pg-readwrite jwt=${default_account_token}
+JWT=$(oc sa get-token default -n app)
+vault write --tls-skip-verify auth/kubernetes/login role=pg-readwrite jwt=${JWT}
 
 ```
 
@@ -278,92 +228,33 @@ Read the secret:
 
 ```
 export VAULT_TOKEN=418R4AnbyUKNWEPR8uTbUQyR
-vault read -tls-skip-verify database/creds/pg-readwrite
-vault read -tls-skip-verify secret/example
+vault read  database/creds/pg-readwrite
+vault read  secret/example
 ```
 
 # Vault Agent
 
-## Standalone
-
-```
-oc project app
-
-oc create configmap vault-agent-config --from-file=vault-agent-config=agent/vault-agent.config
-oc create -f agent/vault-agent.yaml
-```
-
-Find token under */var/run/secrets/vaultproject.io/token*
-
-```
-pod=$(oc get pods -lapp=vault-agent --no-headers -o custom-columns=NAME:.metadata.name)
-oc exec $pod -- cat /var/run/secrets/vaultproject.io/token
-```
-
-```
-87kor7VqW7N4GZIAwnNWGijr
-```
-
-Read the secret:
-
-```
-export VAULT_TOKEN=87kor7VqW7N4GZIAwnNWGijr
-vault read -tls-skip-verify secret/example
-```
+## [Standalone Deployment](agent/README.md)
 
 ## Manual Sidecar Container
 
-Using **Agent Vault** and **Vault Secret Fetcher** as sidecar containers
-
-Follow the instruction from [Vault Secret Fetcher ](https://github.com/openlab-red/vault-secret-fetcher) to publish the vault secret fetcher image in OpenShift.
-
+Using **Agent Vault** as sidecar containers
 
 > **Note**
 >
 > Right now all the examples only read the properties file at bootstrap.
 >
 
-### Spring Example
+### [Spring Example](examples/spring-example/README.md)
+### [Thorntail Example](examples/thorntail-example/README.md)
+### [EAP Example](examples/eap-example/README.md)
+### [Python Example](examples/python3-example/README.md)
 
-```
-    oc project app
+# Vault Injector Mutating Webhook Configuration
 
-    oc new-build --name=spring-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/spring-example
-    oc create -f examples/spring-example/spring-example.yaml
-```
+1. Vault Injector Mutating Webhook Installation
 
-### Thorntail Example
-
-```
-    oc project app
-
-    oc new-build --name=thorntail-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/thorntail-example
-    oc create -f examples/thorntail-example/thorntail-example.yaml
-```
-
-### EAP Example
-
-1. Enable Annotation Property Replacement and Vault Module for properties
-
-    ```
-        oc project app
-
-        cd examples/eap-example
-        oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
-    ```
-
-2. Deploy EAP application
-
-    ```     
-        oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
-        oc create -f eap-example.yaml
-    ``` 
-
-## Mutating Webhook Configuration
-
-1. Configure Mutating WebHook
-
-    Follow the setup instruction from [Mutating Webhook Configuration ](https://github.com/openlab-red/mutating-webhook-vault-agent)
+    [Installation](vault/injector/README.md)
 
 2. Enable the vault webhook for the **app** project
 
@@ -371,45 +262,17 @@ Follow the instruction from [Vault Secret Fetcher ](https://github.com/openlab-r
     oc label namespace app vault-agent-webhook=enabled
     ```
         
-### Spring Example
-
-```
-oc project app
-
-oc new-build --name=spring-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/spring-example
-oc create -f examples/spring-example/spring-inject.yaml
-```
-
-
-
-### Thorntail Example
-
-```
-oc project app
-
-oc new-build --name=thorntail-example  registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/thorntail-example
-oc create -f examples/thorntail-example/thorntail-inject.yaml
-```
-
-### EAP Example
-
-
-1. Enable Annotation Property Replacement and Vault Module for properties
-
-    ```
-        cd examples/eap-example
-        oc create configmap jboss-cli --from-file=postconfigure.sh=extensions/postconfigure.sh --from-file=extensions.cli=extensions/extensions.cli
-    ```
-
-2. Deploy EAP application
-
-    ```     
-        oc new-build --name=eap-example registry.access.redhat.com/jboss-eap-7/eap71-openshift~https://github.com/openlab-red/hashicorp-vault-for-openshift --context-dir=/examples/eap-example    
-        oc create -f examples/eap-example/eap-inject.yaml
-    ``` 
+### [Spring Example](examples/spring-example/README.md)
+### [Thorntail Example](examples/thorntail-example/README.md)
+### [EAP Example](examples/eap-example/README.md)
+### [Python Example](examples/python3-example/README.md)
+### [Quarkus Example](examples/quarkus-example/README.md)
 
 # References
 
+* https://www.vaultproject.io/docs/agent/template/index.html
+* https://github.com/hashicorp/vault-k8s
+* https://www.vaultproject.io/docs/platform/k8s/injector/
 * https://github.com/raffaelespazzoli/credscontroller
 * https://blog.openshift.com/managing-secrets-openshift-vault-integration/
 * https://blog.openshift.com/vault-integration-using-kubernetes-authentication-method

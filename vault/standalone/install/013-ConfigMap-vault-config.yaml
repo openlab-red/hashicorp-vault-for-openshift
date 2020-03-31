@@ -1,0 +1,27 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vault-config
+  labels:
+    app.kubernetes.io/instance: vault
+    app.kubernetes.io/name: vault
+data:
+  vault-config: |
+    {
+      "backend": {
+        "file": {
+          "path": "/vault/data"
+        }
+      },
+      "default_lease_ttl": "168h",
+      "max_lease_ttl": "720h",
+      "disable_mlock": true,
+      "ui": true,
+      "listener": {
+        "tcp": {
+          "address": "0.0.0.0:8200",
+          "tls_cert_file": "/var/run/secrets/kubernetes.io/certs/tls.crt",
+          "tls_key_file": "/var/run/secrets/kubernetes.io/certs/tls.key"
+        }
+      }
+    }

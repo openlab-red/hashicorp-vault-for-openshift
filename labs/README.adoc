@@ -1,0 +1,149 @@
+:data-uri:
+:favicon: favicon.ico
+:toc: left
+:sectanchors: true
+:sectlinks: true
+:sectnums: true
+:encoding: UTF-8
+
+= DRAFT: Cloud-native secret management for microservices using Vault on OpenShift
+
+//include::sidebarhighlight.adoc[]
+
+== Introduction and Lab Outline
+
+This lab walks you through the process of building HashiCorp Vault in OpenShift.
+Vault secures, stores, and tightly controls access to tokens, passwords, certificates, API keys, and other secrets in modern computing.
+Using Vault together with OpenShift/Kubernetes improves the security and flexibility of handling any kind of secrets,
+complementing and extending the built-in Kubernetes secret-handling capabilities.
+This session is aimed at OpenShift ops and developers with general coding experience.
+
+
+[cols="1,3"]
+|===
+| **Lab Technical Difficulty:** | **Beginner** - Basic command line knowledge is useful, and lots of help is available!
+|===
+
+=== Why would I want to learn how to use HashiCorp in OpenShift for developers?
+
+Credentials are environment dependent configurations that need to be kept secret and should be read only by subjects with a need-to-know.
+OpenShift offers secrets as a way to inject credentials. Secrets behave as encoded-64 configmaps. From a security perspective, they have the following limitations (as of release 3.5):
+
+1. They are not encrypted at rest.
+2. By default, cluster admins can see all the secrets of all the tenants.
+3. When in use (i.e. mounted as tempfs in the node that runs the pod that is using them), they can be seen by a node administrator.
+4. When in use, they can be seen by anyone who has the ability to remote shell into the container.
+
+If your organization can accept these limitations, I encourage you to use secrets because I believe that they will get better in future releases of OpenShift.
+
+If your organization cannot work with the current OpenShift secret feature, then you need to find another way to inject credentials in your pods.
+
+=== What will I do in this lab?
+
+. You'll start this lab by logging into a build-workstation running in Red
+Hat's cloud. You will have root access on this workstation.
+. Setup and install *Image Builder*, the new tool on RHEL8 for building RHEL images
+. Create an image "blueprint" with a custom package selection
+. Build this image in a cloud format of your choice (eg, AMI, VMDK).
+
+[NOTE]
+This lab produces a virtual machine that is several Gb in size,
+which is unpractical to upload to a cloud provider during the Red Hat Summit due to
+bandwidth limits. This lab includes instructions on how you would upload the image using the
+cloud tools which you can read through.
+
+=== What skills do I need for this lab?
+
+It's recommended that you have some basic Linux skills and advanced Java developer skills
+- it mean you are able to build and run java applications.
+Please do ask if you have questions, Red Hatters should always be nearby to
+help out!
+
+=== After completing this lab, you should be able...
+
+- To understand how to install a HashiCorp Vault in OpenShift
+- To understand how HashiCorp works in OpenShift
+- Be able use secrets in your microservices using Vault
+
+
+=== Author, support and acknowledgments
+
+This lab was authored by **Codrin Bucur**, **Mattia Mascia**, **Nikolaj Majorov**,
+**Ricardo Lourenco**
+
+
+* Finally, thanks to __**you**__ for choosing this lab as part of you Red Hat Summit experience!
+
+=== __**Read everything**__!
+
+This lab has been designed for you to learn *how* things work from top to
+bottom. This means there are lots of descriptions and reading, not just
+commands for you to copy and paste! If you just copy and paste all the commands
+you can be done in 30 minutes... but you won't learn anything!
+
+You have plenty of time to complete the lab, take it slow and read everything.
+If you get stuck, don't be afraid to ask for help at any time, but the answer
+is *probably* in the lab documentation ;-)
+
+== Lab Orientation
+
+=== Environment
+
+TODO: descriptions for environment
+
+
+
+=== Code/Command Blocks
+
+    This is example of a code/command block
+
+There are lots of blocks like this used in the lab. Most of the time they are
+showing you what happens when you run a command, and you are expected to also
+run that command on your workstation.
+
+For example, in this block;
+
+    lab-user@workstation-GUID: whoami
+    lab-user
+
+You need to run the command `whoami` on your workstation, and you should see
+output (in this case `lab-user`) that matches the code block. Whenever you see
+a line that starts with `lab-user@workstation-GUID:` - this is telling you that
+you need to run the following command. Note that on your workstation the `GUID`
+will be specific to your lab code GUID.
+
+If you are unsure what command to run, or you get what looks like an error
+message, ask a lab admin for help! ;-)
+
+
+== Vault setup
+
+=== Welcome to your workstation!
+
+If you logged in successfully, you should see this message;
+
+----
+=================================================
+
+Welcome to the secret management for microservices using Vault on OpenShift Lab!
+
+Please open the LAB documentation from the
+links provided before you get started, and
+don't be afraid to ask for help if you need it!
+
+=================================================
+
+Web console: https://workstation-GUID.rhpds.opentlc.com:9090/ 
+
+Last login: Wed Apr 24 16:25:54 2019
+lab-user@workstation-GUID:
+----
+
+
+
+include::./lab001/ReadMe.adoc[]
+
+
+include::./lab002/ReadMe.adoc[]
+
+
