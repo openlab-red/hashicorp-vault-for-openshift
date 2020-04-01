@@ -17,38 +17,36 @@ public class ExternalConfigSource implements ConfigSource {
     private final String CONFIG_PROPERTY_PATH = "com.vault.demo.config.path";
     private final String CONFIG_SOURCE_NAME = "ExternalConfigSource";
     private final int ORDINAL = 300;
-    final private Properties properties;
+    final Map<String, String> map = new HashMap<>();
 
     
     public ExternalConfigSource() throws IOException {
         // TODO: Caused by: java.util.NoSuchElementException: Property com.vault.demo.config.path not found 
         //final String location = ConfigProvider.getConfig().getValue(CONFIG_PROPERTY_PATH, String.class);
         final String location = "/vault/secrets/application.properties";
-        this.properties = new Properties();
-
+        final Properties properties = new Properties();
         final Path path = FileSystems.getDefault().getPath(location);
-        this.properties.load(Files.newInputStream(path));
+        properties.load(Files.newInputStream(path));
+
+        properties.stringPropertyNames()
+                .stream()
+                .forEach(key-> map.put(key, properties.getProperty(key)));
 	}
 
 
     @Override
     public String getValue(String s) {
-        return properties.getProperty(s);
+        return map.get(s);
     }
 
     @Override
     public Map<String, String> getProperties() {
-        final Map<String, String> map = new HashMap<>();
-
-        properties.stringPropertyNames()
-                .stream()
-                .forEach(key-> map.put(key, properties.getProperty(key)));
         return map;
     }
 
     @Override
     public Set<String> getPropertyNames() {
-        return properties.stringPropertyNames();
+        return map.keySet();
     }
 
     @Override
