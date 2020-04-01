@@ -14,7 +14,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 public class ExternalConfigSource implements ConfigSource {
-
+    
     private final String CONFIG_PROPERTY_PATH = "com.vault.demo.config.path";
     private final String CONFIG_SOURCE_NAME = "ExternalConfigSource";
     private final int ORDINAL = 300;
