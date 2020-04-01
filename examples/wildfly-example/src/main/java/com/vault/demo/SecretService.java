@@ -2,10 +2,8 @@ package com.vault.demo;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import javax.ejb.Stateless;
 import javax.inject.Inject;
 
-@Stateless
 public class SecretService {
 
     @Inject
