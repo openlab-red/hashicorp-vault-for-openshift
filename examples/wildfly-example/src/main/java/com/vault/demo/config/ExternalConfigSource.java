@@ -9,8 +9,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-
-import org.eclipse.microprofile.config.ConfigProvider;
+//import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.spi.ConfigSource;
 
 public class ExternalConfigSource implements ConfigSource {
@@ -18,15 +17,16 @@ public class ExternalConfigSource implements ConfigSource {
     private final String CONFIG_PROPERTY_PATH = "com.vault.demo.config.path";
     private final String CONFIG_SOURCE_NAME = "ExternalConfigSource";
     private final int ORDINAL = 300;
-    final private String location;
     final private Properties properties;
 
     
     public ExternalConfigSource() throws IOException {
-        this.location = ConfigProvider.getConfig().getValue(CONFIG_PROPERTY_PATH, String.class);
+        // TODO: Caused by: java.util.NoSuchElementException: Property com.vault.demo.config.path not found 
+        //final String location = ConfigProvider.getConfig().getValue(CONFIG_PROPERTY_PATH, String.class);
+        final String location = "/vault/secrets/application.properties";
         this.properties = new Properties();
 
-        final Path path = FileSystems.getDefault().getPath(this.location);
+        final Path path = FileSystems.getDefault().getPath(location);
         this.properties.load(Files.newInputStream(path));
 	}
 

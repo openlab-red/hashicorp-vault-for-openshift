@@ -266,6 +266,7 @@ Using **Agent Vault** as sidecar containers
 ### [Thorntail Example](examples/thorntail-example/README.md)
 ### [EAP Example](examples/eap-example/README.md)
 ### [Python Example](examples/python3-example/README.md)
+### [Wildfly MP Example](examples/wildfly-example/README.md)
 ### [Quarkus Example](examples/quarkus-example/README.md)
 
 # References
