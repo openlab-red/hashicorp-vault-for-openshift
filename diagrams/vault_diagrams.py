@@ -45,13 +45,17 @@ def basic_vault_agent_architecture():
 
         with Cluster("Secure Pod"):
             vault_agent = Custom("Vault Agent", crio_icon)
+            vault_init_agent = Custom("Init Vault Agent", crio_icon)
+
+            manual = [vault_init_agent, vault_agent]
+
             app_container = Custom("App", crio_icon)
             inMemory = Vol("In Memory")
 
-            vault_agent >> inMemory
+            manual >> inMemory
             app_container << inMemory
 
-            vault_agent << svc << vault_agent >> Edge() << app_container
+            manual << svc << manual >> Edge() << app_container
         
         apiserver >> Edge() << vault
 
