@@ -1,13 +1,12 @@
 # Vault
 
+![Vault Architecture](diagrams/mutating_webhook.png)
+
 ## Deploy Vault on OpenShift
 
 ### [Standalone Deployment](https://github.com/openlab-red/hashicorp-vault-for-openshift/blob/rh-summit-2020/vault/standalone/README.md)
 
 ### [High Availability Deployment](https://github.com/openlab-red/hashicorp-vault-for-openshift/blob/rh-summit-2020/vault/ha/README.md)
-
-### [Project diagram](https://raw.githubusercontent.com/openlab-red/hashicorp-vault-for-openshift/rh-summit-2020/labs/lab001/diagrams/project_graph.gif)
-
 
 ## Configure Kubernetes Auth with the Vault
 

@@ -1,7 +1,5 @@
 package com.vault.demo.config;
 
-import org.yaml.snakeyaml.Yaml;
-
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -10,8 +8,6 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Properties;
 
 @Singleton
