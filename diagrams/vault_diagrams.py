@@ -1,13 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-# Usage
-$ python3 vault_diagrams.py -h
-
-# Generate all
-$ python3 vault_diagrams.py
-
-Supported options: "basic | webhook | all (default)"
-"""
 
 from diagrams import Cluster, Diagram, Edge
 
