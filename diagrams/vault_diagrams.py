@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+# Usage
+$ python3 vault_diagrams.py -h
+
+# Generate all
+$ python3 vault_diagrams.py
+
+Supported options: "basic | webhook | all (default)"
+"""
+
 from diagrams import Cluster, Diagram, Edge
 
 from diagrams.k8s.infra import ETCD
@@ -21,7 +32,7 @@ import os
 import argparse
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-crio_icon = os.path.join(APP_ROOT, "cri-o.png")
+crio_icon = os.path.join(APP_ROOT, "resources/cri-o.png")
 
 def basic_vault_agent_architecture():
     with Diagram(name="Vault Agent Architecture", show=False):
@@ -36,10 +47,6 @@ def basic_vault_agent_architecture():
             file_backend = PV("File Backend")
             encrypted_store = PostgreSQL("Encrypted Store")
 
-            with Cluster("Init Vault"):
-                vault_agent = Custom("Vault-Agent", crio_icon)
-                vault - vault_agent
-
             vault_apps = []
             apiserver << Edge(label="verify SA token", color="orange") << vault
             vault_apps.append(vault >> svc << vault >> file_backend >> encrypted_store)
@@ -51,11 +58,11 @@ def basic_vault_agent_architecture():
             app_container = Custom("App-Container", crio_icon)
             vault_agent >> Edge() << app_container
             svc << Edge() << vault_agent
-            svc << Edge(label="use token to get secrets", color="orange") << app_container
+            svc << Edge(label="use token to get secrets", color="orange") << vault_agent
 
 
 def webhooked_vault_agent_architecture():
-    with Diagram(name="Mutating Webhook Vault Agent Architecture", show=False):
+    with Diagram(name="Mutating Webhook", show=False):
         with Cluster("Control Plane"):
             apiserver = APIServer()
             etcd = ETCD()
@@ -70,10 +77,6 @@ def webhooked_vault_agent_architecture():
             file_backend = PV("File Backend")
             encrypted_store = PostgreSQL("Encrypted Store")
 
-            with Cluster("Init Vault"):
-                vault_agent = Custom("Vault-Agent", crio_icon)
-                vault - vault_agent
-
             vault_apps = []
             apiserver << Edge(label="verify SA token", color="orange") << vault
             vault_apps.append(vault >> svc << vault >> file_backend >> encrypted_store)
@@ -82,11 +85,11 @@ def webhooked_vault_agent_architecture():
 
         with Cluster("Secure Pod"):
             vault_agent = Custom("Vault-Agent", crio_icon)
-            vault_secret_fetcher = Custom("Secret Fetcher", crio_icon)
+            vault_agent_init = Custom("Init-Vault-Agent", crio_icon)
             app_container = Custom("App-Container", crio_icon)
             vault_agent >> Edge() << app_container
             svc << Edge() << vault_agent
-            svc << Edge(label="use token to get secrets", color="orange") << app_container
+            svc << Edge(label="Use token to get secrets", color="orange") << vault_agent
 
         webhook = SQS("Mutating Webhook")
         apiserver >> Edge(label="Notified at pod creation") >> webhook >> Edge(label="Injects") >> vault_agent
@@ -95,12 +98,15 @@ def main():
     parser = argparse.ArgumentParser(
         description="Generates different Vault diagrams")
     parser.add_argument("--type", "-t",
-        default="basic",
-        help="basic | webhook")
+        default="all",
+        help="basic | webhook | all (default)")
 
     args = parser.parse_args()
 
-    if args.type != "basic" or args.type == "webhook":
+    if args.type == "all":
+        basic_vault_agent_architecture()
+        webhooked_vault_agent_architecture()
+    elif args.type == "webhook":
         webhooked_vault_agent_architecture()
     else:
         basic_vault_agent_architecture()
