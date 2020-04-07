@@ -19,8 +19,7 @@ The following kubernetes components will be created:
 ## Additional changes
 
 * Upgraded to MutatingWebhookConfiguration v1 API
-* Agent RunAsUser has as default value the RunAsUser defined in app container.
-
+* Agent RunAsUser has as a default value the RunAsUser defined in the application container.
 
 # Reference
 
