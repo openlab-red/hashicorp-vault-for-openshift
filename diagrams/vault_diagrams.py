@@ -64,10 +64,10 @@ def webhooked_vault_agent_architecture():
         with Cluster("Control Plane"):
             apiserver = APIServer()
 
-        with Cluster("Mutating Webhook"):
+        with Cluster(""):
             webhook = SQS("Mutating Webhook")
 
-        with Cluster("Vault"):
+        with Cluster(""):
             vault = Vault("Vault")
 
         with Cluster("Secure Pod"):
