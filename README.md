@@ -258,7 +258,7 @@ Using **Agent Vault** as sidecar containers
 2. Enable the vault webhook for the **app** project
 
     ```
-    oc label namespace app vault-agent-webhook=enabled
+    oc label namespace app vault.hashicorp.com/agent-webhook=enabled
     ```
         
 ### [Spring Example](examples/spring-example/README.md)
