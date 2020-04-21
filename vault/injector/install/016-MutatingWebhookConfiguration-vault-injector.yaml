@@ -30,4 +30,4 @@ webhooks:
         resources: ["deploymentConfig"]
     namespaceSelector:
       matchLabels:
-          sidecar.agent.vaultproject.io/webhook: enabled
+          vault.hashicorp.com/agent-webhook: enabled
