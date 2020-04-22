@@ -14,5 +14,5 @@ spec:
     - from:
         - namespaceSelector: {}
       ports:
-      - port: 443
+      - port: 8080
         protocol: TCP
