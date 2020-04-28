@@ -4,9 +4,9 @@
 
 ## Deploy Vault on OpenShift
 
-### [Standalone Deployment](https://github.com/openlab-red/hashicorp-vault-for-openshift/blob/rh-summit-2020/vault/standalone/README.md)
+### [Standalone Deployment](vault/standalone/README.md)
 
-### [High Availability Deployment](https://github.com/openlab-red/hashicorp-vault-for-openshift/blob/rh-summit-2020/vault/ha/README.md)
+### [High Availability Deployment](vault/ha/README.md)
 
 ## Configure Kubernetes Auth with the Vault
 
@@ -24,8 +24,8 @@
 Exec the following command.
 
 ```
-export KEYS=vMIVXLRMgK3duZnjTbPQVerJKHzus+/EIsgbnYLajSk=
-export ROOT_TOKEN=s.dHqf2R7ql3gOOp9wDDkvZPkE
+export KEYS=QzlUGvdPbIcM83UxyjuGd2ws7flZdNimQVCNbUvI2aU=
+export ROOT_TOKEN=s.UPBPfhDXYOtnv8mELhPA4br7
 export VAULT_TOKEN=$ROOT_TOKEN
 
 JWT=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)

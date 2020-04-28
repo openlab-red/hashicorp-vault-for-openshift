@@ -21,7 +21,7 @@ spec:
       serviceAccountName: "vault-injector"
       containers:
         - name: sidecar-injector
-          image: "openlabred/vault-k8s:latest"
+          image: "openlabred/vault-k8s:0.3.1"
           imagePullPolicy: IfNotPresent
           env:
             - name: NAMESPACE
@@ -41,7 +41,7 @@ spec:
             - name: AGENT_INJECT_TLS_AUTO
               value: vault-agent-injector-cfg
             - name: AGENT_INJECT_TLS_AUTO_HOSTS
-              value: "vault-agent-injector-svc,vault-agent-injector-svc.$(NAMESPACE),vault-agent-injector-svc.$(NAMESPACE).svc"
+              value: "vault-agent-injector-svc,vault-agent-injector-svc.$(NAMESPACE),vault-agent-injector-svc.$(NAMESPACE).svc"        
           args:
             - agent-inject
             - 2>&1
