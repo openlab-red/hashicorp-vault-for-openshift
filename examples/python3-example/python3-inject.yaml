@@ -53,13 +53,6 @@ spec:
       annotations:
         vault.hashicorp.com/agent-inject: 'true'
         vault.hashicorp.com/ca-key: '/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt'
-        vault.hashicorp.com/agent-inject-secret-application.yaml: secret/example
-        vault.hashicorp.com/agent-inject-template-application.yaml: |
-          {{- with secret "secret/example" -}}
-          secret:
-            example:
-              password: {{ .Data.password }}
-          {{- end }}
         vault.hashicorp.com/role: example
         vault.hashicorp.com/agent-configmap: "example"
       labels:
@@ -68,7 +61,7 @@ spec:
     spec:
       containers:
       - name: python3-example
-        image: python3:latest
+        image: python3-example:latest
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -90,13 +83,13 @@ spec:
           name: vault-cabundle
       volumes:
       - configMap:
-          name: vault-agent-cabundle
+          name: vault-cabundle
         name: vault-cabundle
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: vault-agent-cabundle
+  name: vault-cabundle
   labels:
     app.kubernetes.io/instance: vault-agent
     app.kubernetes.io/name: vault-agent
@@ -105,73 +98,66 @@ metadata:
 data: {}
 
 ---
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: example
 data:
+  template.ctmpl: |
+    {{ with secret "secret/example" }}
+      this is the password: {{ .Data.password }}
+    {{ end }}
   config.hcl: |
-    "auto_auth" = {
-      "method" = {
-        "config" = {
-          "role" = "example"
-        }
-        "type" = "kubernetes"
-      }
-
-      "sink" = {
-        "config" = {
-          "path" = "/home/vault/.token"
-        }
-
-        "type" = "file"
-      }
+    "vault" = {
+        "ca_path" = "/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt"
+        "address" = "https://poc-vault.hashicorp.svc.cluster.local:8200"
     }
-
+    "pid_file" = "/home/vault/.pid"
+    "auto_auth" = {
+            method "kubernetes"  {
+                    "type" = "kubernetes"
+                    "mount_path" = "auth/kubernetes"
+                    "config" = {
+                            "role" = "example"
+                            "jwt" = "@/var/run/secrets/kubernetes.io/serviceaccount/token"
+                    }
+            }
+            "sink" = {
+                    "type" = "file"
+                    "config" = {
+                            "path" = "/home/vault/.token"
+                    }
+            }
+    }
+    "template" {
+        "source"      = "/vault/config/template.ctmpl"
+        "destination" = "application.yaml"
+    }
     "exit_after_auth" = false
-    "pid_file" = "/home/vault/.pid"
-
-    "template" = {
-      "contents" = "{{- with secret \"secret/example" -}}The secret is - {{ .Data.password }}{{- end }}"
-      "destination" = "application.yaml"
-    }
-
+  config-init.hcl: | 
     "vault" = {
-      "address" = "https://vault.demo.svc.cluster.local:8200"
-      "ca_cert" = "/vault/tls/ca.crt"
-      "client_cert" = "/vault/tls/client.crt"
-      "client_key" = "/vault/tls/client.key"
+        "ca_path" = "/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt"
+        "address" = "https://poc-vault.hashicorp.svc.cluster.local:8200"
     }
-  config-init.hcl: |
+    "pid_file" = "/home/vault/.pid"
     "auto_auth" = {
-      "method" = {
-        "config" = {
-          "role" = "db-app"
-        }
-        "type" = "kubernetes"
-      }
-
-      "sink" = {
-        "config" = {
-          "path" = "/home/vault/.token"
-        }
-
-        "type" = "file"
-      }
+            method "kubernetes"  {
+                    "type" = "kubernetes"
+                    "mount_path" = "auth/kubernetes"
+                    "config" = {
+                            "role" = "example"
+                            "jwt" = "@/var/run/secrets/kubernetes.io/serviceaccount/token"
+                    }
+            }
+            "sink" = {
+                    "type" = "file"
+                    "config" = {
+                            "path" = "/home/vault/.token"
+                    }
+            }
     }
-
+    "template" {
+        "source"      = "/vault/config/template.ctmpl"
+        "destination" = "application.yaml"
+    }
     "exit_after_auth" = true
-    "pid_file" = "/home/vault/.pid"
-
-    "template" = {
-      "contents" = "{{- with secret \"secret/example" -}}The secret is - {{ .Data.password }}{{- end }}"
-      "destination" = "application.yaml"
-    }
-
-    "vault" = {
-      "address" = "https://vault.demo.svc.cluster.local:8200"
-      "ca_cert" = "/vault/tls/ca.crt"
-      "client_cert" = "/vault/tls/client.crt"
-      "client_key" = "/vault/tls/client.key"
-    }

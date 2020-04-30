@@ -17,7 +17,7 @@ FLASK_APP = Flask(__name__)
 def get_secret(secrets_file_path = 'resources/application.txt'):
     """ prints secret data as read from specified file """
 
-    os.path.join(APP_ROOT, secret_file_path)
+    os.path.join(APP_ROOT, secrets_file_path)
     secrets_absolute_file_path = get_environment_variables['PYTHON3_CONFIG_LOCATION'] or os.path.join(APP_ROOT, secret_file_path)
 
     if not os.path.exists(secrets_absolute_file_path):
