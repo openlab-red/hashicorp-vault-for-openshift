@@ -61,6 +61,7 @@ spec:
               password: {{ .Data.password }}
           {{- end }}
         vault.hashicorp.com/role: example
+        vault.hashicorp.com/agent-configmap: "example"
       labels:
         app.kubernetes.io/instance: python3-example
         app.kubernetes.io/name: python3-example
@@ -102,3 +103,75 @@ metadata:
   annotations:
     service.beta.openshift.io/inject-cabundle: "true"
 data: {}
+
+---
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: example
+data:
+  config.hcl: |
+    "auto_auth" = {
+      "method" = {
+        "config" = {
+          "role" = "example"
+        }
+        "type" = "kubernetes"
+      }
+
+      "sink" = {
+        "config" = {
+          "path" = "/home/vault/.token"
+        }
+
+        "type" = "file"
+      }
+    }
+
+    "exit_after_auth" = false
+    "pid_file" = "/home/vault/.pid"
+
+    "template" = {
+      "contents" = "{{- with secret \"secret/example" -}}The secret is - {{ .Data.password }}{{- end }}"
+      "destination" = "application.yaml"
+    }
+
+    "vault" = {
+      "address" = "https://vault.demo.svc.cluster.local:8200"
+      "ca_cert" = "/vault/tls/ca.crt"
+      "client_cert" = "/vault/tls/client.crt"
+      "client_key" = "/vault/tls/client.key"
+    }
+  config-init.hcl: |
+    "auto_auth" = {
+      "method" = {
+        "config" = {
+          "role" = "db-app"
+        }
+        "type" = "kubernetes"
+      }
+
+      "sink" = {
+        "config" = {
+          "path" = "/home/vault/.token"
+        }
+
+        "type" = "file"
+      }
+    }
+
+    "exit_after_auth" = true
+    "pid_file" = "/home/vault/.pid"
+
+    "template" = {
+      "contents" = "{{- with secret \"secret/example" -}}The secret is - {{ .Data.password }}{{- end }}"
+      "destination" = "application.yaml"
+    }
+
+    "vault" = {
+      "address" = "https://vault.demo.svc.cluster.local:8200"
+      "ca_cert" = "/vault/tls/ca.crt"
+      "client_cert" = "/vault/tls/client.crt"
+      "client_key" = "/vault/tls/client.key"
+    }
