@@ -45,7 +45,6 @@ spec:
         kind: ImageStreamTag
         name: golang-example:latest
         namespace: hashicorp
-      lastTriggeredImage: image-registry.openshift-image-registry.svc:5000/hashicorp/golang@sha256:8a21dbf00cd2e8b193e019a1631b23af59ca2fff4d74e150ffacd93266af2285
     type: ImageChange
   
 ---
