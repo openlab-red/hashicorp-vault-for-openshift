@@ -129,7 +129,7 @@ data:
             }
     }
     "template" {
-        "source"      = "/vault/config/template.ctmpl"
+        "source"      = "/vault/configs/template.ctmpl"
         "destination" = "/vault/secrets/config.yaml"
     }
     "exit_after_auth" = false
@@ -156,7 +156,7 @@ data:
             }
     }
     "template" {
-        "source"      = "/vault/config/template.ctmpl"
+        "source"      = "/vault/configs/template.ctmpl"
         "destination" = "/vault/secrets/config.yaml"
     }
     "exit_after_auth" = true
