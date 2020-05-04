@@ -45,16 +45,16 @@ vault operator init --tls-skip-verify -key-shares=1 -key-threshold=1
 Save the `Unseal Key 1` and the `Initial Root Token`:
 
 ```
-Unseal Key 1: vMIVXLRMgK3duZnjTbPQVerJKHzus+/EIsgbnYLajSk=
+Unseal Key 1: QzlUGvdPbIcM83UxyjuGd2ws7flZdNimQVCNbUvI2aU=
 
-Initial Root Token: s.dHqf2R7ql3gOOp9wDDkvZPkE
+Initial Root Token: s.UPBPfhDXYOtnv8mELhPA4br7
 ```
 
 And export them as environment variables, for further use:
 
 ```
-export KEYS=vMIVXLRMgK3duZnjTbPQVerJKHzus+/EIsgbnYLajSk=
-export ROOT_TOKEN=s.dHqf2R7ql3gOOp9wDDkvZPkE
+export KEYS=QzlUGvdPbIcM83UxyjuGd2ws7flZdNimQVCNbUvI2aU=
+export ROOT_TOKEN=s.UPBPfhDXYOtnv8mELhPA4br7
 export VAULT_TOKEN=$ROOT_TOKEN
 ```
 

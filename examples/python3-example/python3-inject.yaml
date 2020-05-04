@@ -53,21 +53,15 @@ spec:
       annotations:
         vault.hashicorp.com/agent-inject: 'true'
         vault.hashicorp.com/ca-key: '/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt'
-        vault.hashicorp.com/agent-inject-secret-application.yaml: secret/example
-        vault.hashicorp.com/agent-inject-template-application.yaml: |
-          {{- with secret "secret/example" -}}
-          secret:
-            example:
-              password: {{ .Data.password }}
-          {{- end }}
         vault.hashicorp.com/role: example
+        vault.hashicorp.com/agent-configmap: "example"
       labels:
         app.kubernetes.io/instance: python3-example
         app.kubernetes.io/name: python3-example
     spec:
       containers:
       - name: python3-example
-        image: python3:latest
+        image: python3-example:latest
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -89,16 +83,81 @@ spec:
           name: vault-cabundle
       volumes:
       - configMap:
-          name: vault-agent-cabundle
+          name: vault-cabundle
         name: vault-cabundle
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: vault-agent-cabundle
+  name: vault-cabundle
   labels:
     app.kubernetes.io/instance: vault-agent
     app.kubernetes.io/name: vault-agent
   annotations:
     service.beta.openshift.io/inject-cabundle: "true"
 data: {}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: example
+data:
+  template.ctmpl: |
+    {{ with secret "secret/example" }}
+      this is the password: {{ .Data.password }}
+    {{ end }}
+  config.hcl: |
+    "vault" = {
+        "ca_path" = "/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt"
+        "address" = "https://poc-vault.hashicorp.svc.cluster.local:8200"
+    }
+    "pid_file" = "/home/vault/.pid"
+    "auto_auth" = {
+            method "kubernetes"  {
+                    "type" = "kubernetes"
+                    "mount_path" = "auth/kubernetes"
+                    "config" = {
+                            "role" = "example"
+                            "jwt" = "@/var/run/secrets/kubernetes.io/serviceaccount/token"
+                    }
+            }
+            "sink" = {
+                    "type" = "file"
+                    "config" = {
+                            "path" = "/home/vault/.token"
+                    }
+            }
+    }
+    "template" {
+        "source"      = "/vault/config/template.ctmpl"
+        "destination" = "application.yaml"
+    }
+    "exit_after_auth" = false
+  config-init.hcl: | 
+    "vault" = {
+        "ca_path" = "/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt"
+        "address" = "https://poc-vault.hashicorp.svc.cluster.local:8200"
+    }
+    "pid_file" = "/home/vault/.pid"
+    "auto_auth" = {
+            method "kubernetes"  {
+                    "type" = "kubernetes"
+                    "mount_path" = "auth/kubernetes"
+                    "config" = {
+                            "role" = "example"
+                            "jwt" = "@/var/run/secrets/kubernetes.io/serviceaccount/token"
+                    }
+            }
+            "sink" = {
+                    "type" = "file"
+                    "config" = {
+                            "path" = "/home/vault/.token"
+                    }
+            }
+    }
+    "template" {
+        "source"      = "/vault/config/template.ctmpl"
+        "destination" = "application.yaml"
+    }
+    "exit_after_auth" = true

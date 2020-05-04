@@ -12,4 +12,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: vault-injector
-  namespace: hashicorp
+  namespace: test-rhsso74
