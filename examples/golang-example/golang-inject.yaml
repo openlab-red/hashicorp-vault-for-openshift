@@ -1,0 +1,159 @@
+---
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: golang-example
+    app.kubernetes.io/component: golang-example
+    app.kubernetes.io/instance: golang-example
+  name: golang-example
+spec:
+  replicas: 1
+  selector:
+    deploymentconfig: golang-example
+  strategy:
+    type: Rolling
+  template:
+    metadata:
+      labels:
+        deploymentconfig: golang-example
+    spec:
+      containers:
+      - image: golang-example:latest
+        imagePullPolicy: Always
+        name: golang-example
+        volumeMounts: 
+        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount/ca-bundle
+          name: vault-cabundle
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          name: vault-cabundle
+        name: vault-cabundle
+  triggers:
+  - type: ConfigChange
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - golang-example
+      from:
+        kind: ImageStreamTag
+        name: golang-latest:latest
+        namespace: hashicorp
+      lastTriggeredImage: image-registry.openshift-image-registry.svc:5000/hashicorp/golang@sha256:8a21dbf00cd2e8b193e019a1631b23af59ca2fff4d74e150ffacd93266af2285
+    type: ImageChange
+  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: golang-example
+    app.kubernetes.io/component: golang-example
+    app.kubernetes.io/instance: golang-example
+  name: golang-example
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    deploymentconfig: golang-example
+
+---
+kind: Route
+metadata:
+  labels:
+    app: golang-example
+    app.kubernetes.io/component: golang-example
+    app.kubernetes.io/instance: golang-example
+  name: golang
+spec:
+  host: golang-hashicorp.apps.ocp.bdmsky.net
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: golang-example
+    weight: 100
+  wildcardPolicy: None
+
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vault-cabundle
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+data: {}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: example
+data:
+  template.ctmpl: |
+    {{ with secret "secret/example" }}
+      secret: {{ .Data.password }}
+    {{ end }}
+  config.hcl: |
+    "vault" = {
+        "ca_path" = "/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt"
+        "address" = "https://poc-vault.hashicorp.svc.cluster.local:8200"
+    }
+    "pid_file" = "/home/vault/.pid"
+    "auto_auth" = {
+            method "kubernetes"  {
+                    "type" = "kubernetes"
+                    "mount_path" = "auth/kubernetes"
+                    "config" = {
+                            "role" = "example"
+                            "jwt" = "@/var/run/secrets/kubernetes.io/serviceaccount/token"
+                    }
+            }
+            "sink" = {
+                    "type" = "file"
+                    "config" = {
+                            "path" = "/home/vault/.token"
+                    }
+            }
+    }
+    "template" {
+        "source"      = "/vault/config/template.ctmpl"
+        "destination" = "/resources/config.yaml"
+    }
+    "exit_after_auth" = false
+  config-init.hcl: | 
+    "vault" = {
+        "ca_path" = "/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt"
+        "address" = "https://poc-vault.hashicorp.svc.cluster.local:8200"
+    }
+    "pid_file" = "/home/vault/.pid"
+    "auto_auth" = {
+            method "kubernetes"  {
+                    "type" = "kubernetes"
+                    "mount_path" = "auth/kubernetes"
+                    "config" = {
+                            "role" = "example"
+                            "jwt" = "@/var/run/secrets/kubernetes.io/serviceaccount/token"
+                    }
+            }
+            "sink" = {
+                    "type" = "file"
+                    "config" = {
+                            "path" = "/home/vault/.token"
+                    }
+            }
+    }
+    "template" {
+        "source"      = "/vault/config/template.ctmpl"
+        "destination" = "/resources/config.yaml"
+    }
+    "exit_after_auth" = true
