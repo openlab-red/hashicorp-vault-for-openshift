@@ -44,7 +44,6 @@ spec:
       from:
         kind: ImageStreamTag
         name: golang-example:latest
-        namespace: hashicorp
     type: ImageChange
   
 ---
@@ -74,7 +73,7 @@ metadata:
     app.kubernetes.io/instance: golang-example
   name: golang
 spec:
-  host: golang-hashicorp.apps.ocp.bdmsky.net
+  host: golang-example-hashicorp.apps.ocp.bdmsky.net
   port:
     targetPort: 8080
   tls:
