@@ -1,5 +1,7 @@
 # Golang Example
 
+This example is injecting secrets using ConfigMaps instead of templating them directly in deployment annotations: https://www.vaultproject.io/docs/platform/k8s/injector/examples#configmap-example
+
 ## Build the Application
 
 ```
