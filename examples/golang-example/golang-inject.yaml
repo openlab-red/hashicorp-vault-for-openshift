@@ -105,9 +105,9 @@ metadata:
   name: example
 data:
   template.ctmpl: |
-    {{ with secret "secret/example" }}
-      secret: {{ .Data.password }}
-    {{ end }}
+    {{- with secret "secret/example" }}
+    secret: {{ .Data.password }}
+    {{- end }}
   config.hcl: |
     "vault" = {
         "ca_path" = "/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt"
@@ -132,7 +132,7 @@ data:
     }
     "template" {
         "source"      = "/vault/config/template.ctmpl"
-        "destination" = "/resources/config.yaml"
+        "destination" = "/vault/secrets/config.yaml"
     }
     "exit_after_auth" = false
   config-init.hcl: | 
@@ -159,6 +159,6 @@ data:
     }
     "template" {
         "source"      = "/vault/config/template.ctmpl"
-        "destination" = "/resources/config.yaml"
+        "destination" = "/vault/secrets/config.yaml"
     }
     "exit_after_auth" = true
