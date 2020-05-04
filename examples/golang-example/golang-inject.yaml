@@ -15,6 +15,11 @@ spec:
     type: Rolling
   template:
     metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/ca-key: '/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt'
+        vault.hashicorp.com/role: example
+        vault.hashicorp.com/agent-configmap: "example"
       labels:
         deploymentconfig: golang-example
     spec:
@@ -38,7 +43,7 @@ spec:
       - golang-example
       from:
         kind: ImageStreamTag
-        name: golang-latest:latest
+        name: golang-example:latest
         namespace: hashicorp
       lastTriggeredImage: image-registry.openshift-image-registry.svc:5000/hashicorp/golang@sha256:8a21dbf00cd2e8b193e019a1631b23af59ca2fff4d74e150ffacd93266af2285
     type: ImageChange
@@ -61,6 +66,7 @@ spec:
     deploymentconfig: golang-example
 
 ---
+apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   labels:
@@ -79,7 +85,6 @@ spec:
     name: golang-example
     weight: 100
   wildcardPolicy: None
-
 
 ---
 kind: ConfigMap
