@@ -71,7 +71,7 @@ metadata:
     app: golang-example
     app.kubernetes.io/component: golang-example
     app.kubernetes.io/instance: golang-example
-  name: golang
+  name: golang-example
 spec:
   host: golang-example-hashicorp.apps.ocp.bdmsky.net
   port:
