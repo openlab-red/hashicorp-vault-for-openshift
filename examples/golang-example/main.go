@@ -30,29 +30,29 @@ func init() {
 }
 
 func (s *Secrets) secretsHandler(w http.ResponseWriter, req *http.Request) {
-	/*
-		filename, errPath := filepath.Abs("/secrets/example.yaml")
-		if errPath != nil {
-			log.Info("Cannot find yaml conifg file /secrets/example.yaml. Fallback")
-		}
-	*/
 
 	yamlFile, err := ioutil.ReadFile((*s).path)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		log.Error(err.Error())
+	}
 	var config Config
 	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
+		log.Error(err.Error())
 	}
 
 	w.Write([]byte("The secret is: " + config.Secret))
-	log.Infof("%s %s %s", req.Method, req.RequestURI, req.Proto)
+	log.Info(req.Method + req.RequestURI + " " + req.Proto)
 }
 
 func helloHandler(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte("hello"))
-	log.Infof("%s %s %s", req.Method, req.RequestURI, req.Proto)
+	log.Info(req.Method + req.RequestURI + " " + req.Proto)
 }
 
 func headersHandler(w http.ResponseWriter, req *http.Request) {
@@ -62,13 +62,7 @@ func headersHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(jsonHeaders)
-	log.Infof("%s %s %s", req.Method, req.RequestURI, req.Proto)
-	/*
-		for name, value := range (*req).Header {
-			response := name + ":" + strings.Join(value, ",") + "\n"
-			w.Write([]byte(response))
-		}
-	*/
+	log.Info(req.Method + req.RequestURI + " " + req.Proto)
 }
 
 func main() {
