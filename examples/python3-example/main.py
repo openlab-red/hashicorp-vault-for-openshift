@@ -14,16 +14,13 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 FLASK_APP = Flask(__name__)
 
 @FLASK_APP.route('/secret', methods=['GET'])
-def get_secret(secrets_file_path = 'resources/application.txt'):
+def get_secret(secret_file_path='resources/application.txt'):
     """ prints secret data as read from specified file """
 
-    os.path.join(APP_ROOT, secrets_file_path)
-    secrets_absolute_file_path = get_environment_variables['PYTHON3_CONFIG_LOCATION'] or os.path.join(APP_ROOT, secret_file_path)
-
-    if not os.path.exists(secrets_absolute_file_path):
+    if not os.path.exists(os.path.join(APP_ROOT, secret_file_path)):
         return json.dumps({'File not found': False}), 404
 
-    with open(secrets_absolute_file_path) as f:
+    with open(os.path.join(APP_ROOT, secret_file_path)) as f:
         return f.read()
 
 @FLASK_APP.route('/healthz', methods=['GET'])
@@ -32,6 +29,7 @@ def check_healthz():
 
     return json.dumps({'success':True}), 200
 
+@FLASK_APP.route('/env', methods=['GET'])
 def get_environment_variables():
     """ dumps a json dict built from python3 environment variables """
 
@@ -49,7 +47,8 @@ def get_api():
 
     return json.dumps({
         '/secret': 'reveals the stored secret',
-        '/healthz': 'healthcheck endpoint'
+        '/healthz': 'healthcheck endpoint',
+        '/env': 'debug environment variables'
     })
 
 
