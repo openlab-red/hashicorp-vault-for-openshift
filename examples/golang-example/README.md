@@ -1,4 +1,4 @@
-# Python Example
+# Golang Example
 
 ## Build the Application
 
