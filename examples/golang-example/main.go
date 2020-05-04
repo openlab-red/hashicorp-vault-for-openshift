@@ -36,6 +36,7 @@ func (s *Secrets) secretsHandler(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		log.Error(err.Error())
+		return
 	}
 	var config Config
 	err = yaml.Unmarshal(yamlFile, &config)
@@ -43,6 +44,7 @@ func (s *Secrets) secretsHandler(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		log.Error(err.Error())
+		return
 	}
 
 	w.Write([]byte("The secret is: " + config.Secret))
@@ -71,7 +73,7 @@ func main() {
 
 	s := Secrets{
 		//path: "resources/config.yaml",
-		path: "/resources/config.yaml",
+		path: "/vault/secrets/config.yaml",
 	}
 	http.HandleFunc("/secrets", s.secretsHandler)
 	http.HandleFunc("/hello", helloHandler)
