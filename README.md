@@ -4,9 +4,9 @@
 
 ## Deploy Vault on OpenShift
 
-### [Standalone Deployment](https://github.com/openlab-red/hashicorp-vault-for-openshift/blob/rh-summit-2020/vault/standalone/README.md)
+### [Standalone Deployment](vault/standalone/README.md)
 
-### [High Availability Deployment](https://github.com/openlab-red/hashicorp-vault-for-openshift/blob/rh-summit-2020/vault/ha/README.md)
+### [High Availability Deployment](vault/ha/README.md)
 
 ## Configure Kubernetes Auth with the Vault
 
@@ -233,7 +233,7 @@ vault read  secret/example
 
 # Vault Agent
 
-## [Standalone Deployment](agent/README.md)
+## [Standalone Deployment](vault/agent/README.md)
 
 ## Manual Sidecar Container
 
