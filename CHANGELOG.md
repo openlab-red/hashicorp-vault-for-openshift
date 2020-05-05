@@ -1,6 +1,8 @@
-# 1.3.4 | 24/04/2020
+# 1.3.5 | 05/05/2020
 
-* [hashicorp/vault:1.3.4](https://hub.docker.com/layers/vault/library/vault/1.3.4/images/sha256-7fa8c11454f3d921f5326b33bae85d50f58e13698ff01895d36bbbc7fa82659b?context=explore)
+## Image Version
+
+* [hashicorp/vault:1.3.5](https://hub.docker.com/layers/vault/library/vault/1.3.5/images/sha256-f14406083da62be6d8e620a97e2333bdd1965e9022fc254e58d3e17d038cf87c?context=explore)
 
 ## New Examples
 * [Golang Example](examples/golang-example/README.md)
