@@ -1,3 +1,11 @@
+# 1.4.1 | Next
+
+## Image Version
+
+* [hashicorp/vault:1.4.1](https://hub.docker.com/layers/vault/library/vault/1.4.1/images/sha256-4161adbd9733623c089bbac60cbac66c55326284baf7fb72f5781d9a56184088?context=explore)
+
+
+
 # 1.3.5 | 05/05/2020
 
 ## Image Version
