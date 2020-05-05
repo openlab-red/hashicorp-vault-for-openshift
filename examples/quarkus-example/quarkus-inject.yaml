@@ -96,4 +96,3 @@ metadata:
     app.kubernetes.io/name: vault-agent
   annotations:
     service.beta.openshift.io/inject-cabundle: "true"
-data: {}
