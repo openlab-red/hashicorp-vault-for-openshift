@@ -15,5 +15,5 @@ oc new-app --name=golang-example https://github.com/openlab-red/hashicorp-vault-
 ### Mutating Webhook Configuration
 
 ```
-    oc apply -f examples/golang-example/python3-inject.yaml
+    oc apply -f examples/golang-example/golang-inject.yaml
 ```

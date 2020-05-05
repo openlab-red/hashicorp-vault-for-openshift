@@ -109,7 +109,7 @@ data:
   config.hcl: |
     "vault" = {
         "ca_path" = "/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt"
-        "address" = "https://poc-vault.hashicorp.svc.cluster.local:8200"
+        "address" = "https://vault.hashicorp.svc.cluster.local:8200"
     }
     "pid_file" = "/home/vault/.pid"
     "auto_auth" = {
@@ -136,7 +136,7 @@ data:
   config-init.hcl: | 
     "vault" = {
         "ca_path" = "/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt"
-        "address" = "https://poc-vault.hashicorp.svc.cluster.local:8200"
+        "address" = "https://vault.hashicorp.svc.cluster.local:8200"
     }
     "pid_file" = "/home/vault/.pid"
     "auto_auth" = {
