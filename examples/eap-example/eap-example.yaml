@@ -139,7 +139,7 @@ spec:
       name: eap-example
     spec:
       initContainers:
-      - image: vault:1.3.4
+      - image: vault:1.4.1
         name: vault-agent-init
         ports:
         - containerPort: 8200
@@ -213,7 +213,7 @@ spec:
               name: jboss-cli
             - mountPath: /var/run/secrets/vaultproject.io
               name: vault-agent-volume
-        - image: vault:1.3.4
+        - image: vault:1.4.1
           name: vault-agent
           ports:
           - containerPort: 8200
