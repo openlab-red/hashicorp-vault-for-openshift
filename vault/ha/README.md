@@ -12,7 +12,7 @@ The Consul storage backend is officially supported by HashiCorp.
 oc new-project hashicorp
 
 git clone https://github.com/hashicorp/consul-helm.git /tmp/consul-helm
-helm install consul /tmp/consul-helm
+helm install ha-backend /tmp/consul-helm
 ```
 
 >
@@ -34,34 +34,75 @@ oc -n hashicorp create route reencrypt consul --port=8500 --service=consul-consu
 
 ## Vault Installation
 
->
-> Vault helm chart is not used on purpose, the aim is to understand all components involed.
->
-> If you like to use vault helm chart in OpenShift consider the following.
->
-> IPC_LOCK capability is fixed and it cannot be removed. This is not necessary because in OpenShift the swap is disabled.
->
-> The User, Group and fsGroup id are fixed on the manifest, the values can be overridden but still is not necessary to force the id.
->
+The official way of installing Vault to Kubernetes is using Helm Charts. [Beta support](https://www.vaultproject.io/docs/platform/k8s/helm/openshift) for OpenShift has been introduced recently.
 
+This release supports creation of OpenShift passthrough routes, but we forked these charts and added support for reencrypt routes and for the Services to be signed by OpenShift internal CA. We are working with Hashicorp to include these features in further Helm charts releases.
 
 ```
-oc apply -f ./vault/ha/install/
+# Clone the forked repository
+git clone -b openshift4 --single-branch https://github.com/radudd/vault-helm.git
+
+# Define Route 
+export VAULT_URL=vault.apps.domain.name
+
+# Create override file
+cat <<EOF > override-ha.yaml
+global:
+  tlsDisable: false
+  openshift: true
+
+server:
+  route:
+    enabled: true
+    host: $VAULT_URL
+  standalone:
+    enabled: false
+  ha:
+    enabled: true
+    replicas: 3
+    config: |
+      ui = true
+      listener "tcp" {
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+        tls_cert_file = "/var/run/secrets/kubernetes.io/certs/tls.crt"
+        tls_key_file = "/var/run/secrets/kubernetes.io/certs/tls.key"
+      }
+      storage "consul" {
+        path = "vault"
+        address = "ha-backend-consul-server:8500"
+      }
+      service_registration "kubernetes" {}
+EOF
+
+# Install Vault
+helm install ha . -f override-ha.yaml
 ```
 
-The following kubernetes components will be created:
+The following kubernetes components will be created.
 
-* vault-server-binding ClusterRoleBinding
-* vault ServiceAccount
-* vault-config ConfigMap
-* vault PodDisruptionBudget
-* vault StatefulSet
-* vault Route
-* vault NetworkPolicy
+Injector components:
+* injector ClusterRole 
+* injector ClusterRoleBinding
+* injector MutatingWebhookConfiguration
+* injector Deployment
+* injector ServiceAccount
 
+Server components:
+* server ClusterRole 
+* server ClusterRoleBinding
+* server ServiceAccount
+* server ConfigMap
+* server Service
+* server Service Active
+* server Service Internal
+* server Service Standby
+* server StatefulSet
+* server Route
+* server NetworkPolicy
 
 >
-> vault-server-binding ClusterRoleBinding allows vault service account to leverage Kubernetes oauth with the oauth-delegator ClusterRole
+> server ClusterRoleBinding allows vault service account to leverage Kubernetes oauth with the oauth-delegator ClusterRole
 >
 
 >

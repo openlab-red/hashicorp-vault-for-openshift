@@ -1,27 +1,73 @@
 
 # Standalone Deployment
 
-Single instance installation
+The official way of installing Vault to Kubernetes is using Helm Charts. [Beta support](https://www.vaultproject.io/docs/platform/k8s/helm/openshift) for OpenShift has been introduced recently.
+
+This release supports creation of OpenShift passthrough routes, but we forked these charts and added support for reencrypt routes and for the Services to be signed by OpenShift internal CA. We are working with Hashicorp to include these features in further Helm charts releases.
 
 ```
-oc new-project hashicorp
+# Clone the forked repository
+git clone -b openshift4 --single-branch https://github.com/radudd/vault-helm.git
 
-oc apply -f ./vault/standalone/install/
+# Define Route 
+export VAULT_URL=vault.apps.domain.name
+
+# Create override file
+cat <<EOF > override-standalone.yaml
+global:
+  tlsDisable: false
+  openshift: true
+
+server:
+  route:
+    enabled: true
+    host: $VAULT_URL
+  standalone:
+    enabled: true
+    config: |
+      ui = true
+      listener "tcp" {
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+        tls_cert_file = "/var/run/secrets/kubernetes.io/certs/tls.crt"
+        tls_key_file = "/var/run/secrets/kubernetes.io/certs/tls.key"
+      }
+      storage "file" {
+        path = "/vault/data"
+      }
+  ha:
+    enabled: false
+EOF
+
+# Install Vault
+helm install standalone . -f override-standalone.yaml
 ```
 
-The following kubernetes components will be created:
+The following kubernetes components will be created.
 
-* vault-server-binding ClusterRoleBinding
-* vault ServiceAccount
-* vault-storage PersistentVolumeClaim with 10Gi size
-* vault-config ConfigMap
-* vault Service
-* vault Deployment
-* vault Route
-* vault NetworkPolicy
+Injector components:
+* injector ClusterRole 
+* injector ClusterRoleBinding
+* injector MutatingWebhookConfiguration
+* injector Deployment
+* injector ServiceAccount
+
+Server components:
+* server ClusterRole 
+* server ClusterRoleBinding
+* server ServiceAccount
+* server ConfigMap
+* server Service
+* server Service Active
+* server Service Internal
+* server Service Standby
+* server StatefulSet
+* server Route
+* server NetworkPolicy
+* server PersistentVolumeClaim (template from StatefulSet)
 
 >
-> vault-server-binding ClusterRoleBinding allows vault service account to leverage Kubernetes oauth with the oauth-delegator ClusterRole
+> server ClusterRoleBinding allows vault service account to leverage Kubernetes oauth with the oauth-delegator ClusterRole
 >
 
 >
