@@ -34,9 +34,9 @@ oc -n hashicorp create route reencrypt consul --port=8500 --service=consul-consu
 
 ## Vault Installation
 
-The official way of installing Vault to Kubernetes is using Helm Charts. [Beta support](https://www.vaultproject.io/docs/platform/k8s/helm/openshift) for OpenShift has been introduced recently.
+The official way of installing Vault to Kubernetes is using Helm Charts. Their latest release includes [beta support for OpenShift](https://www.vaultproject.io/docs/platform/k8s/helm/openshift).
 
-This release supports creation of OpenShift passthrough routes, but we forked these charts and added support for reencrypt routes and for the Services to be signed by OpenShift internal CA. We are working with Hashicorp to include these features in further Helm charts releases.
+This includes for now only the possibility to create OpenShift passthrough routes, but we forked these official charts and added the possibility to use reencrypt routes and to rely on OpenShift internal CA for signing Vault. We are working with Hashicorp to include these features in further Helm charts releases.
 
 ```
 # Clone the forked repository
