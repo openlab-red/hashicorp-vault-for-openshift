@@ -8,9 +8,11 @@ Install [High Availability Storage Compatible](https://www.vaultproject.io/docs/
 
 The Consul storage backend is officially supported by HashiCorp.
 
-:warning: HashiCorp **doesn't recommend** that Vault connects directly to Consul backend, but through the Consul Agents [1]. However, as the Consul Agents deployment on OpenShift / K8S requires the SecurityContext to allow opening the _8502_ _hostPort_ [2] on the OpenShift nodes, we will disable Agent deployment in our example. Hence we will not respect the recommendation and we will connect directly to Consul. **Consider this carefully when moving to a production deployment.**
+> :warning: HashiCorp **doesn't recommend** that Vault connects directly to Consul backend, but through the Consul Agents [1]. However, as the Consul Agents deployment on OpenShift / K8S requires the SecurityContext to allow opening the _8502_ _hostPort_ [2] on the OpenShift nodes, we will disable Agent deployment in our example. Hence we will not respect the recommendation and we will connect directly to Consul. **Consider this carefully when moving to a production deployment.**
+
 
 [1] https://learn.hashicorp.com/vault/operations/ops-vault-ha-consul#consul-client-agent-configuration
+
 [2] https://kubernetes.io/docs/concepts/policy/pod-security-policy/#host-namespaces
 
 ```
