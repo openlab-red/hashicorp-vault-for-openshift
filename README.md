@@ -253,7 +253,7 @@ Using **Agent Vault** as sidecar containers
 
 1. Vault Injector Mutating Webhook Installation
 
-    [Installation](vault/injector/README.md)
+    > This is performed automatically together Helm chart installations for both Standalone and HA deployment.
 
 2. Enable the vault webhook for the **app** project
 
