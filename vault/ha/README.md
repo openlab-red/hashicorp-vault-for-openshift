@@ -156,7 +156,7 @@ export KEYS=hhL/LRDPsSGRzG8N8UvEuHBo7TC4GOGyKV6VwhX2OHU=
 export ROOT_TOKEN=s.HUA25MAzSqgguvqW8NozZP0Z
 export VAULT_TOKEN=$ROOT_TOKEN
 
-vault operator unseal $KEYS
+vault operator unseal -tls-skip-verify $KEYS
 ```
 
 ### Auto Unseal Vault
