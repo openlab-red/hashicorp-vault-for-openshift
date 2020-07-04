@@ -8,20 +8,27 @@ Install [High Availability Storage Compatible](https://www.vaultproject.io/docs/
 
 The Consul storage backend is officially supported by HashiCorp.
 
+> :warning: HashiCorp **doesn't recommend** that Vault connects directly to Consul backend, but through the Consul Agents [1]. However, as the Consul Agents deployment on OpenShift / K8S requires the SecurityContext to allow opening the _8502_ _hostPort_ [2] on the OpenShift nodes, we will disable Agent deployment in our example. Hence we will not respect the recommendation and we will connect directly to Consul. **Consider this carefully when moving to a production deployment.**
+
+
+[1] https://learn.hashicorp.com/vault/operations/ops-vault-ha-consul#consul-client-agent-configuration
+
+[2] https://kubernetes.io/docs/concepts/policy/pod-security-policy/#host-namespaces
+
 ```
 oc new-project hashicorp
 
 git clone https://github.com/hashicorp/consul-helm.git /tmp/consul-helm
-helm install ha-backend /tmp/consul-helm
+helm install --set client.enabled=false ha-backend /tmp/consul-helm
 ```
 
 >
 > Consul Helm has a fixed securityContext.fsGroup: 1000
-> The vaule 1000 is not an allowed group for OpenShift, will apply a patch to remove it.
+> The value 1000 is not an allowed group for OpenShift, will apply a patch to remove it.
 >
 
 ```
-oc -n hashicorp patch sts consul-consul-server --type json --patch="[
+oc -n hashicorp patch sts ha-backend-consul-server --type json --patch="[
   {"op": "remove", "path": "/spec/template/spec/securityContext"}
 ]"
 ```
@@ -29,7 +36,7 @@ oc -n hashicorp patch sts consul-consul-server --type json --patch="[
 Expose Consul UI
 
 ```
-oc -n hashicorp create route reencrypt consul --port=8500 --service=consul-consul-server
+oc -n hashicorp create route reencrypt consul --port=8500 --service=ha-backend-consul-server
 ```
 
 ## Vault Installation
@@ -119,9 +126,9 @@ oc adm  pod-network make-projects-global hashicorp
 In case of High Availability, the unseal has to be done in all vault replicas. 
 
 ```
-oc rsh vault-0
+oc rsh ha-vault-0
 
-vault operator init -key-shares=1 -key-threshold=1
+vault operator init -key-shares=1 -key-threshold=1 -tls-skip-verify
 ```
 
 Save the `Unseal Key 1` and the `Initial Root Token`:
@@ -149,7 +156,7 @@ export KEYS=hhL/LRDPsSGRzG8N8UvEuHBo7TC4GOGyKV6VwhX2OHU=
 export ROOT_TOKEN=s.HUA25MAzSqgguvqW8NozZP0Z
 export VAULT_TOKEN=$ROOT_TOKEN
 
-vault operator unseal $KEYS
+vault operator unseal -tls-skip-verify $KEYS
 ```
 
 ### Auto Unseal Vault
