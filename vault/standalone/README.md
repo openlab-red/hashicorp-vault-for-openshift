@@ -1,9 +1,11 @@
 
 # Standalone Deployment
 
-The official way of installing Vault to Kubernetes is using Helm Charts. Their latest release includes [beta support for OpenShift](https://www.vaultproject.io/docs/platform/k8s/helm/openshift).
+The official way of installing Vault to Kubernetes is using Helm Charts. This includes [support for OpenShift](https://www.vaultproject.io/docs/platform/k8s/helm/openshift).
 
-This includes for now only the possibility to create OpenShift passthrough routes, but we forked these official charts and added the possibility to use reencrypt routes and to rely on OpenShift internal CA for signing Vault. We are working with Hashicorp to include these features in further Helm charts releases.
+This includes for now only the possibility to create OpenShift passthrough routes, but we [forked these official charts](http://github.com/radudd/vault-helm) and added the possibility to use reencrypt routes and to rely on OpenShift internal CA for signing Vault
+
+## Deployment
 
 ```
 # Clone the forked repository
