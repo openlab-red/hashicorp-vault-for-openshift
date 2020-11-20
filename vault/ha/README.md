@@ -1,90 +1,86 @@
 # High Availability Deployment
 
-High Availability installation with 3 replicas.
+The official way of installing Vault to Kubernetes is using Helm Charts. This includes [support for OpenShift](https://www.vaultproject.io/docs/platform/k8s/helm/openshift).
 
-## Prerequisite
+This includes for now only the possibility to create OpenShift passthrough routes, but we [forked these official charts](http://github.com/radudd/vault-helm) and added the possibility to use reencrypt routes and to rely on OpenShift internal CA for signing Vault
+
+## Install
+
+### About Storage backends
 
 Install [High Availability Storage Compatible](https://www.vaultproject.io/docs/configuration/storage) with Hashicorp High Availability.
 
-The Consul storage backend is officially supported by HashiCorp.
+We will use Consul storage backend in our examples which is officially supported bby HashiCorp.
 
-> :warning: HashiCorp **doesn't recommend** that Vault connects directly to Consul backend, but through the Consul Agents [1]. However, as the Consul Agents deployment on OpenShift / K8S requires the SecurityContext to allow opening the _8502_ _hostPort_ [2] on the OpenShift nodes, we will disable Agent deployment in our example. Hence we will not respect the recommendation and we will connect directly to Consul. **Consider this carefully when moving to a production deployment.**
+> :warning: **DISCLAIMER**: HashiCorp **doesn't recommend** that Vault connects directly to Consul backend, but [through the Consul Agents](https://learn.hashicorp.com/vault/operations/ops-vault-ha-consul#consul-client-agent-configuration). However, as the Consul Agents deployment on OpenShift / K8S requires the SecurityContext to allow [opening the _8502_ _hostPort_](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#host-namespaces) on the OpenShift nodes, we will disable Agent deployment in our example. Hence we will not respect the recommendation and we will connect directly to Consul. **Consider this carefully when moving to a production deployment.**
+
+> :warning: **DISCLAIMER**: Consul doesn't use ACLs for our first scenario, so Consul endpoint must be secured. Anyone with anonymous access to Consul might *delete* Vault data. For production usage, you should implement ACLs. Use the following references: [Vault](https://www.vaultproject.io/docs/configuration/storage/consul#acls) and [Consul](https://www.consul.io/docs/k8s/helm#v-global-acls-bootstraptoken). You can also check the [minimal implementation](#Consul-HA-ACL) from this repository.
 
 
-[1] https://learn.hashicorp.com/vault/operations/ops-vault-ha-consul#consul-client-agent-configuration
+### Deployment Storage Backend and Vault
 
-[2] https://kubernetes.io/docs/concepts/policy/pod-security-policy/#host-namespaces
+Create new project
 
 ```
 oc new-project hashicorp
-
-git clone https://github.com/hashicorp/consul-helm.git /tmp/consul-helm
-helm install --set client.enabled=false ha-backend /tmp/consul-helm
 ```
 
->
-> Consul Helm has a fixed securityContext.fsGroup: 1000
-> The value 1000 is not an allowed group for OpenShift, will apply a patch to remove it.
->
+Then fetch Consul Helm chart dependency.
 
 ```
-oc -n hashicorp patch sts ha-backend-consul-server --type json --patch="[
-  {"op": "remove", "path": "/spec/template/spec/securityContext"}
-]"
+helm repo add hashicorp https://helm.releases.hashicorp.com
 ```
 
-Expose Consul UI
-
+Before installing Consul and Vault, clone our forked repository
 ```
-oc -n hashicorp create route reencrypt consul --port=8500 --service=ha-backend-consul-server
-```
-
-## Vault Installation
-
-The official way of installing Vault to Kubernetes is using Helm Charts. Their latest release includes [beta support for OpenShift](https://www.vaultproject.io/docs/platform/k8s/helm/openshift).
-
-This includes for now only the possibility to create OpenShift passthrough routes, but we forked these official charts and added the possibility to use reencrypt routes and to rely on OpenShift internal CA for signing Vault. We are working with Hashicorp to include these features in further Helm charts releases.
-
-```
-# Clone the forked repository
 git clone -b openshift4 --single-branch https://github.com/radudd/vault-helm.git
-
-# Define Route 
-export VAULT_URL=vault.apps.domain.name
-
-# Create override file
-cat <<EOF > override-ha.yaml
-global:
-  tlsDisable: false
-  openshift: true
-
-server:
-  route:
-    enabled: true
-    host: $VAULT_URL
-  standalone:
-    enabled: false
-  ha:
-    enabled: true
-    replicas: 3
-    config: |
-      ui = true
-      listener "tcp" {
-        address = "[::]:8200"
-        cluster_address = "[::]:8201"
-        tls_cert_file = "/var/run/secrets/kubernetes.io/certs/tls.crt"
-        tls_key_file = "/var/run/secrets/kubernetes.io/certs/tls.key"
-      }
-      storage "consul" {
-        path = "vault"
-        address = "ha-backend-consul-server:8500"
-      }
-      service_registration "kubernetes" {}
-EOF
-
-# Install Vault
-helm install ha . -f override-ha.yaml
 ```
+
+### Consul HA and no ACLs
+
+If deploying HA Vault with Consul with no agents and no ACLs, update the `override/consul-noacl.yaml` according to your needs.
+
+Then deploy Consul (from official charts)
+
+```
+helm install vault-backend hashicorp/consul -f override/consul-noacl.yaml
+```
+
+Adapt `override/vault-ha-consul-noacl.yaml` to your needs and then deploy Vault (from our forked repo)
+
+```
+helm install vault . -f override/vault-ha-consul-noacl.yaml
+```
+
+### Consul HA ACL
+
+If deploying HA Vault with Consul with no agents and you want to use ACLs, update the `override/consul-acl.yaml` according to your needs.
+
+Then deploy Consul (from official charts)
+
+```
+helm install vault-backend hashicorp/consul -f override/consul-acl.yaml
+```
+
+Extract the generated ACL token
+
+```
+TOKEN=`oc get secret consul-consul-bootstrap-acl-token -o template --template '{{.data.token}}'|base64 -d`
+```
+
+Add this token to Vault override
+
+```
+sed -i "/token/s/dummytoken/$TOKEN" override/vault-ha-consul-acl.yaml
+```
+
+Adapt `override/vault-ha-consul-acl.yaml` to your needs and then deploy Vault (from our forked repo)
+
+```
+helm install vault . -f override/vault-ha-consul-acl.yaml
+```
+
+## Post install
 
 The following kubernetes components will be created.
 
@@ -117,11 +113,11 @@ Server components:
 >
 
 ```
-oc adm  pod-network make-projects-global hashicorp
+oc adm pod-network make-projects-global hashicorp
 ```
 
 
-## Initialize Vault
+### Initialize Vault
 
 In case of High Availability, the unseal has to be done in all vault replicas. 
 
