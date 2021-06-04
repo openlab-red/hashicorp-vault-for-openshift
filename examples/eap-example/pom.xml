@@ -19,7 +19,7 @@
         <version.server.bom>7.1.0.GA</version.server.bom>
         <version.jboss.spec.javaee.7.0>1.1.0.Final-redhat-3</version.jboss.spec.javaee.7.0>
 
-        <httpclient.version>4.5.2.redhat-1</httpclient.version>
+        <httpclient.version>4.5.13</httpclient.version>
         <version.org.apache.commons.commons-lang3>3.5</version.org.apache.commons.commons-lang3>
         <version.org.wildfly.checkstyle-config>1.0.6.Final</version.org.wildfly.checkstyle-config>
     </properties>
