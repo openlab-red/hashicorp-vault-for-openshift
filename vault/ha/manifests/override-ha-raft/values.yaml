@@ -1,0 +1,49 @@
+global:
+  tlsDisable: false
+  openshift: true
+ui:
+  enabled: true
+server:
+  affinity: null
+  route:
+    enabled: true
+    host:
+  extraEnvironmentVars:
+    VAULT_CACERT: "/etc/vault-tls/vault-certs/ca.crt"
+    VAULT_TLS_SERVER_NAME:
+  standalone:
+    enabled: false
+  auditStorage:
+    enabled: true
+    size: 15Gi
+  extraVolumes:
+    - type: "secret"
+      name: "vault-certs"
+      path: "/etc/vault-tls"
+  ha:
+    enabled: true
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+        listener "tcp" {
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+          tls_cert_file = "/etc/vault-tls/vault-certs/tls.crt"
+          tls_key_file = "/etc/vault-tls/vault-certs/tls.key"
+          tls_client_ca_file = "/etc/vault-tls/vault-certs/ca.crt"     	 
+        }
+        storage "raft" {
+          path = "/vault/data"
+          retry_join {
+            leader_api_addr = "https://vault-active.hashicorp.svc:8200"
+            leader_ca_cert_file = "/etc/vault-tls/vault-certs/ca.crt"
+            leader_tls_servername = "vault.apps.mycluster.com"
+          }
+        }
+        log_level = "debug"
+        service_registration "kubernetes" {}
+  service:
+    enabled: true
+
