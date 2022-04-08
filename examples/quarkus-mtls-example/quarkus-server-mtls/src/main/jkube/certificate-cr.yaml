@@ -1,0 +1,20 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: server
+spec:
+  commonName: server.${jkube.namespace}.unconf.io
+  dnsNames:
+    - server.${jkube.namespace}.unconf.io
+    - server-${jkube.namespace}.apps.cluster-k64tb.k64tb.sandbox1857.opentlc.com
+    - server.${jkube.namespace}.svc
+  issuerRef:
+    name: ${jkube.namespace}-issuer-vault
+  secretName: server
+  keystores:
+    pkcs12:
+      create: true
+      passwordSecretRef:
+        key: password
+        name: server-keystore-pass
+
