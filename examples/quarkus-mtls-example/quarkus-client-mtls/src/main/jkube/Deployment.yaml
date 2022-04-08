@@ -1,0 +1,33 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      volumes:
+        - name: client
+          secret:
+            secretName: client
+        - name: config
+          configMap:
+              name: client
+      containers:
+        - name: client
+          ports:
+            - containerPort: 8443
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: client
+              readOnly: true
+              mountPath: /deployments/tls
+            - name: config
+              mountPath: /deployments/config

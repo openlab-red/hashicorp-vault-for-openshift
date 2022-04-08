@@ -1,0 +1,9 @@
+# create the role to grant access to configmaps
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: role-api-reader
+rules:
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["pods","configmaps"]
+    verbs: ["get", "watch", "list"]

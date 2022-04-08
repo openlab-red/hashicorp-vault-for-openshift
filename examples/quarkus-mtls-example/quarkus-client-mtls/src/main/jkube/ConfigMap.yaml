@@ -1,0 +1,23 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: client
+data:
+  application.properties: >-
+    org.acme.client.mtls.GreetingService/mp-rest/url=https://server.${jkube.namespace}.svc:8443
+
+    org.acme.client.mtls.GreetingService/mp-rest/trustStore=/deployments/tls/truststore.p12
+
+    org.acme.client.mtls.GreetingService/mp-rest/trustStorePassword=123423556
+    
+    org.acme.client.mtls.GreetingService/mp-rest/keyStore=/deployments/tls/keystore.p12
+    
+    org.acme.client.mtls.GreetingService/mp-rest/keyStorePassword=123423556
+
+    quarkus.http.ssl.certificate.key-store-file=/deployments/tls/keystore.p12
+
+    quarkus.http.ssl.certificate.key-store-password=123423556
+
+    quarkus.http.ssl.certificate.trust-store-file=/deployments/tls/truststore.p12
+    
+    quarkus.http.ssl.certificate.trust-store-password=123423556
