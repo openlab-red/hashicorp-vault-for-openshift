@@ -3,10 +3,9 @@ kind: Certificate
 metadata:
   name: client
 spec:
-  commonName: client.${jkube.namespace}.unconf.io
+  commonName: client.${jkube.namespace}.vault.int.company.io
   dnsNames:
-    - client.${jkube.namespace}.unconf.io
-    - client-${jkube.namespace}.apps.cluster-k64tb.k64tb.sandbox1857.opentlc.com
+    - client.${jkube.namespace}.vault.int.company.io
     - client.${jkube.namespace}.svc
   issuerRef:
     name: ${jkube.namespace}-issuer-vault
