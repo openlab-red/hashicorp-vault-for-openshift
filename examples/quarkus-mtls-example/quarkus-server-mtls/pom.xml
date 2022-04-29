@@ -84,7 +84,7 @@
     <profile>
       <id>prod</id>
       <properties>
-        <jkube.namespace>team-two</jkube.namespace>
+        <jkube.namespace>team-one</jkube.namespace>
       </properties>
     </profile>
     <profile>
