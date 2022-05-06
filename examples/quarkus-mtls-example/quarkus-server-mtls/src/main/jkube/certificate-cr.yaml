@@ -7,6 +7,7 @@ spec:
   dnsNames:
     - server.${jkube.namespace}.vault.int.company.io
     - server.${jkube.namespace}.svc
+    - server-${jkube.namespace}.apps.cluster-8dl2g.8dl2g.sandbox1725.opentlc.com
   issuerRef:
     name: ${jkube.namespace}-issuer-vault
   secretName: server
