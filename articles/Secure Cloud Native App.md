@@ -207,7 +207,7 @@ Organization Name [Red Hat]:
 Company Name [company.io]:
 ```
 
-As shown in the output above, the value defined in the_openssl.cnf_ configuration file includes a _req_distinguished_name_ entry which is used as the default set of values when generating the certificate. The default values can be used or a user defined set of values can be provided .
+As shown in the output above, the value defined in the *openssl.cnf* configuration file includes a _req_distinguished_name_ entry which is used as the default set of values when generating the certificate. The default values can be used or a user defined set of values can be provided .
 
 Now with the root CA, we can start with the second step of the chain: the intermediate CA.
 
@@ -602,7 +602,7 @@ vault policy -tls-skip-verify write vault-admin ./policy.hcl
 ![](https://lh4.googleusercontent.com/mhKn6pXHkMKN5xJfLA2x_6K47MXwyhSUtqnhLkzCvX-CCQPwVUENphdZTftM5fTi_ggxAPif1SRkJt0sc3EDBSnqJvmUJRywPdNz44h3nXthj_ofFhxaZwAWTs56IvS3X0rBC_lj1Dj33-TvdQ)
 
 >
->**_NOTE:_**_ this policy is intentionally broad to allow testing anything in Vault. In a real life scenario this policy would be scoped down._
+>**_NOTE:_**  *this policy is intentionally broad to allow testing anything in Vault. In a real life scenario this policy would be scoped down.*
 >
 
 4. Switch to the Vault Config Operator project which was automatically created when the operator was installed:
