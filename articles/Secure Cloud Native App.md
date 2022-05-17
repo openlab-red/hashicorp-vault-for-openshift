@@ -14,7 +14,7 @@ In this blog, we will illustrate how OpenShift together with Cert Manager and Ha
 From the developer's point of view, this automated approach is easy to use and is also instrumented so that we know what is going on and can take appropriate action if it fails.
 
 
-## Certificate authority
+## Certificate Authority
 
 The purpose of a Certificate authority (CA) is to validate and issue certificates. A Certificate Authority may be a third-party entity or organization that runs its own provider to issue digital certificates.
 
@@ -27,7 +27,7 @@ Typically, the root CA does not sign server or client certificates directly. The
 So, it is better to not expose it within target environments and to instead issue a shorter-lived intermediate CA. Using intermediate CA also aligns with industry best practices.
 
 
-## CA hierarchy
+## CA Hierarchy
 
 In large organizations, it may be ideal to delegate responsibility for issuing certificates to different certificate authorities for granular security controls appropriate to each CA.
 
@@ -76,7 +76,7 @@ To install Cert Manager Operator within an OpenShift Container Platform environm
 ![](https://lh3.googleusercontent.com/_XALPk-1fgzbDJkUAp-3W3_brDsCExKaE-CEVSLuY8c3u6aA3jqfhJg4DxIfwLEvTwhkIup7vA4aOfXFZdqu5LhV66XNDH12FACkKEwklgLPiYUWGmv4_Ym3pGiDMv_vfjfW2pvdi0HVavvagQ)
 
 
-## Create the CA chain
+## Create the CA Chain
 
 Let’s start from scratch and simulate the creation of our own certificate authority and building the CA hierarchy.
 
@@ -272,7 +272,7 @@ Issuers are Kubernetes’ resources that represent Certificate Authorities (CAs)
 The simplest issuer type is the CA, which references the Kubernetes TLS Secret containing a ca-key pair.
 
 
-## Generate SSL certificates for Vault using Cert Manager
+## Generate SSL Certificates for Vault using Cert Manager
 
 Before Vault can be installed, certificates must be provisioned within a newly created namespace.
 
@@ -391,7 +391,7 @@ cd vault/
 2. Configure Helm Repository:
 
 ```bash
-helm repo add hashicorp<https://helm.releases.hashicorp.com>
+helm repo add hashicorp https://helm.releases.hashicorp.com
 helm repo update
 ```
 
@@ -1046,7 +1046,7 @@ On OpenShift:
     ```bash
         export CA_BUNDLE=$(oc get secret vault-certs -n hashicorp -o json | jq -r '.data."ca.crt"')
 
-        export DEFAULT_SECRET=$(oc get sa default -n team-one -o json | jq -r '.secrets\[0].name')
+        export DEFAULT_SECRET=$(oc get sa default -n team-one -o json | jq -r '.secrets[0].name')
     ```
 
     1.2 Create cert-manager issuer.
@@ -1287,13 +1287,15 @@ spec:
 The sample code is based on [Quarkus](https://quarkus.io/), we define ssl configuration in the client _application.properties_ file as follow:
 
 ```java
-org.acme.client.mtls.GreetingService/mp-rest/url=https&#x3A;//server:8443
+org.acme.client.mtls.GreetingService/mp-rest/url=https://server:8443
 org.acme.client.mtls.GreetingService/mp-rest/trustStore=/deployments/tls/truststore.p12
-org.acme.client.mtls.GreetingService/mp-rest/trustStorePassword=123423556org.acme.client.mtls.GreetingService/mp-rest/keyStore=/deployments/tls/keystore.p12
+org.acme.client.mtls.GreetingService/mp-rest/trustStorePassword=123423556
+org.acme.client.mtls.GreetingService/mp-rest/keyStore=/deployments/tls/keystore.p12
 org.acme.client.mtls.GreetingService/mp-rest/keyStorePassword=123423556
 
 quarkus.http.ssl.certificate.key-store-file=/deployments/tls/keystore.p12
-quarkus.http.ssl.certificate.key-store-password=123423556quarkus.http.ssl.certificate.trust-store-file=/deployments/tls/truststore.p12
+quarkus.http.ssl.certificate.key-store-password=123423556
+quarkus.http.ssl.certificate.trust-store-file=/deployments/tls/truststore.p12
 quarkus.http.ssl.certificate.trust-store-password=123423556
 quarkus.ssl.native=true
 ````
