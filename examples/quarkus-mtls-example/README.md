@@ -20,6 +20,7 @@
   ```
 ### Build & Run OpenShift
   ```
+  export BASE_DOMAIN=$(oc get dns cluster -o jsonpath='{.spec.baseDomain}')
   mvn oc:build oc:resource oc:apply -Pprod
   ```
 ### Uninstall resources in OpenShift

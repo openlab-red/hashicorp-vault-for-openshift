@@ -926,7 +926,7 @@ spec:
 
     # internal sign pki
     path "pki/intermediate/root/sign-intermediate" {
-      capabilities = ["create"]
+      capabilities = ["create", "read", "update", "list"]
     }
 
     # pki 
