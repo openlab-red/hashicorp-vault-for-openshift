@@ -19,6 +19,7 @@
 
     <!-- Application specific -->
     <jkube.namespace>team-three</jkube.namespace>
+    <jkube.baseDomain>${env.BASE_DOMAIN}</jkube.baseDomain> 
   </properties>
   <dependencyManagement>
     <dependencies>
