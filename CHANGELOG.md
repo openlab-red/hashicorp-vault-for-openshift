@@ -1,4 +1,35 @@
-# 1.4.1 | Next
+# 1.9.6-ubi  | Next 
+
+## Version
+* [hashicorp/vault-helm:v0.19.0](https://github.com/hashicorp/vault-helm/releases/tag/v0.19.0)
+* [hashicorp/vault:1.9.6](https://catalog.redhat.com/software/containers/hashicorp/vault/5fda55bd2937386820429e0c?tag=1.9.6-ubi&push_date=1651295139000&container-tabs=overview)
+* [hashicorp/vault-k8s:0.14.2](https://catalog.redhat.com/software/containers/hashicorp/vault-k8s/5fda6941ecb524508951c434?tag=0.14.2-ubi&push_date=1642660877000)
+
+## Installation
+* [Standalone Deployment](vault/standalone/README.md)
+* [High Availability Deployment](vault/ha/README.md)
+* [Vault Injector](vault/injector/README.md)
+
+## OpenShift Tested Version
+
+* [4.9](https://docs.openshift.com/container-platform/4.9/welcome/index.html)
+* [4.10](https://docs.openshift.com/container-platform/4.10/welcome/index.html)
+
+## Cert Manager Integration
+* [PKI Secret Engine](https://github.com/redhat-cop/vault-config-operator/tree/main/test/pkisecretengine)
+
+## Examples
+* [Spring Example](examples/spring-example/README.md)
+* [Thorntail Example](examples/thorntail-example/README.md)
+* [EAP Example](examples/eap-example/README.md)
+* [Python Example](examples/python3-example/README.md)
+* [Wildfly MP Example](examples/wildfly-example/README.md)
+* [Quarkus Example](examples/quarkus-example/README.md)
+* [Golang Example](examples/golang-example/README.md)
+* [Quarkus Mutual TLS](examples/quarkus-mtls-example/README.md)
+
+# Articles
+* [Secure Cloud Native Applications with HashiCorp Vault and Cert-Manager](./articles/Secure%20Cloud%20Native%20App.md)
 
 ## Image Version
 
