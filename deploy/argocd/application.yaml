@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vault
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: hashicorp-vault
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    path: deploy/helm/vault-install
+    repoURL: 'https://github.com/openlab-red/hashicorp-vault-for-openshift'
+    targetRevision: master
+  ignoreDifferences:
+  - group: "admissionregistration.k8s.io"
+    kind: "MutatingWebhookConfiguration"
+    jsonPointers:
+    - /webhooks/clientConfig/caBundle
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - RespectIgnoreDifferences=true

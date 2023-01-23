@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vault-certs
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-4"
+spec:
+  secretName: vault-certs
+  issuerRef:
+    name: ca-issuer
+    kind: Issuer
+  dnsNames: 
+  - {{ .Values.base.server.route.host }}
+  # Service Active FQDN
+  - {{ .Release.Name }}-active.{{ .Release.Namespace }}.svc

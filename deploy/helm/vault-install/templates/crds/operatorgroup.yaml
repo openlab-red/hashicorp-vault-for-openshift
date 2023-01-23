@@ -1,0 +1,10 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  generateName: openshift-cert-manager-operator-
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+  name: openshift-cert-manager-operator-8mfzf
+  namespace: openshift-cert-manager-operator
+spec:
+  upgradeStrategy: Default

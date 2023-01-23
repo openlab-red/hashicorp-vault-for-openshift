@@ -1,0 +1,68 @@
+secretCA: intermediate
+
+base:
+  global:
+    tlsDisable: false
+    openshift: true
+  injector:
+    image:
+      repository: "registry.connect.redhat.com/hashicorp/vault-k8s"
+      tag: "0.14.2-ubi"
+      #tag: "1.1.0-ubi"
+    agentImage:
+      repository: "registry.connect.redhat.com/hashicorp/vault"
+      tag: "1.9.2-ubi"
+      #tag: "1.12.1-ubi"
+  ui:
+    enabled: true
+
+  serverTelemetry:
+    prometheusRules:
+      enabled: false
+
+  server:
+    image:
+      repository: "registry.connect.redhat.com/hashicorp/vault"
+      tag: "1.12.1-ubi"
+    route:
+      enabled: true
+      #host: <RELEASE_NAME>.apps.<DOMAIN>
+      host: vault.apps.p78vf.p78vf.sandbox2342.opentlc.com
+    extraEnvironmentVars:
+      VAULT_CACERT: "/etc/vault-tls/vault-certs/ca.crt"
+      VAULT_TLS_SERVER_NAME:
+    standalone:
+      enabled: false
+    auditStorage:
+      enabled: true
+      size: 15Gi
+    extraVolumes:
+      - type: "secret"
+        name: "vault-certs"
+        path: "/etc/vault-tls"
+    ha:
+      enabled: true
+      raft:
+        enabled: true
+        setNodeId: true
+        config: |
+          ui = true
+          listener "tcp" {
+            address = "[::]:8200"
+            cluster_address = "[::]:8201"
+            tls_cert_file = "/etc/vault-tls/vault-certs/tls.crt"
+            tls_key_file = "/etc/vault-tls/vault-certs/tls.key"
+            tls_client_ca_file = "/etc/vault-tls/vault-certs/ca.crt"
+          }
+          storage "raft" {
+            path = "/vault/data"
+            retry_join {
+              leader_api_addr = "https://vault-active.hashicorp.svc:8200"
+              leader_ca_cert_file = "/etc/vault-tls/vault-certs/ca.crt"
+            }
+          }
+          log_level = "debug"
+          service_registration "kubernetes" {}
+    service:
+      enabled: true
+
