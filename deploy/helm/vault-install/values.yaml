@@ -1,10 +1,12 @@
 secretCA: intermediate
 
 base:
+  nameOverride: vault
   global:
     tlsDisable: false
     openshift: true
   injector:
+    #enabled: false
     image:
       repository: "registry.connect.redhat.com/hashicorp/vault-k8s"
       tag: "0.14.2-ubi"
@@ -13,6 +15,9 @@ base:
       repository: "registry.connect.redhat.com/hashicorp/vault"
       tag: "1.9.2-ubi"
       #tag: "1.12.1-ubi"
+    webhook:
+      annotations:
+        argocd.argoproj.io/sync-wave: "2"
   ui:
     enabled: true
 
@@ -57,7 +62,7 @@ base:
           storage "raft" {
             path = "/vault/data"
             retry_join {
-              leader_api_addr = "https://vault-active.hashicorp.svc:8200"
+              leader_api_addr = "https://vault-active.hashicorp-vault.svc:8200"
               leader_ca_cert_file = "/etc/vault-tls/vault-certs/ca.crt"
             }
           }
@@ -66,3 +71,28 @@ base:
     service:
       enabled: true
 
+
+bootstrap:
+  oc:
+    image:
+      repository: quay.io/openshift/origin-cli
+      pullPolicy: IfNotPresent
+      tag: 4.11
+  vault:
+    image:
+      repository: registry.connect.redhat.com/hashicorp/vault
+      tag: "1.9.2-ubi"
+    init: true
+    auth: true
+  serviceAccount:
+    name: "vault-bootstrap"
+
+#  init:
+#    annotations:
+#      argocd.argoproj.io/sync-wave: "1"
+#  unsealed:
+#    annotations:
+#      argocd.argoproj.io/sync-wave: "1"
+  auth:
+    annotations:
+      argocd.argoproj.io/sync-wave: "2"

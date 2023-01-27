@@ -1,0 +1,50 @@
+{{- if .Values.vault.init -}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "vault-bootstrap.fullname" . }}-init
+  labels:
+    {{- include "vault-bootstrap.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.init.annotations | nindent 4 }}
+spec:
+  backoffLimit: 0
+  #ttlSecondsAfterFinished: 120
+  template:
+    metadata:
+      name: "{{ .Release.Name }}"
+      labels:
+        {{- include "vault-bootstrap.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "vault-bootstrap.serviceAccountName" . }}
+      restartPolicy: Never
+      containers:
+      - name: init
+        image: "{{ .Values.oc.image.repository }}:{{ .Values.oc.image.tag }}"
+        command:
+        - /bin/bash
+        - '-c'
+        - |
+            #!/bin/bash
+
+            # Better rollout pod check
+            sleep 30
+
+            VAULT=$(oc -n {{ .Release.Namespace }} get pod -lapp.kubernetes.io/name=vault -o custom-columns=.:.metadata.name --no-headers)
+
+            echo "Found pod: $VAULT"
+
+            oc -n {{ .Release.Namespace }} delete secret/vault-bootstrap || echo "Secret vault-bootstrap not present"
+
+            oc -n {{ .Release.Namespace }} exec ${VAULT} --  vault operator init -tls-skip-verify -key-shares=1 -key-threshold=1 >/tmp/init.txt
+
+            KEYS=$(cat /tmp/init.txt|grep "Unseal Key 1"|cut -d':' -f2| tr -d ' ')
+            VAULT_TOKEN=$(cat /tmp/init.txt|grep "Initial Root Token"|cut -d':' -f2| tr -d ' ')
+
+            echo "KEYS=${KEYS}" > /tmp/vault.env
+            echo "VAULT_TOKEN=${VAULT_TOKEN}" >> /tmp/vault.env
+
+            # Secret must not part of the release
+            oc create secret generic {{ include "vault-bootstrap.fullname" . }} --from-env-file=/tmp/vault.env
+{{- end }}

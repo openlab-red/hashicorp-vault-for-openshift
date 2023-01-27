@@ -1,0 +1,51 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "vault-bootstrap.fullname" . }}-unsealed
+  labels:
+    {{- include "vault-bootstrap.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.unsealed.annotations | nindent 4 }}
+spec:
+  schedule: "*/1 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 200
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      ttlSecondsAfterFinished: 120
+      template:
+        spec:
+          serviceAccountName: {{ include "vault-bootstrap.serviceAccountName" . }}
+          restartPolicy: Never
+          containers:
+          - name: unsealed
+            #image: {{ .Values.vault.image.repository }}:{{ .Values.vault.image.tag }}
+            image: "{{ .Values.oc.image.repository }}:{{ .Values.oc.image.tag }}"
+            command:
+            - /bin/sh
+            - '-c'
+            - |
+                VAULT=$(oc -n {{ .Release.Namespace }} get pod -lapp.kubernetes.io/name=vault -o custom-columns=.:.metadata.name --no-headers|head -1)
+
+                echo "Using pod: $VAULT"
+
+                oc -n {{ .Release.Namespace }} exec ${VAULT} -- vault status -tls-skip-verify --format=yaml >/tmp/status.txt
+
+                SEALED=$(cat /tmp/status.txt|grep sealed|cut -d':' -f2| tr -d ' ')
+
+                VAULT_PODS=$(oc -n {{ .Release.Namespace }} get pod -lapp.kubernetes.io/name=vault -o custom-columns=.:.metadata.name --no-headers|xargs)
+
+                echo "Found Vault pods: $VAULT_PODS"
+
+                if [[ $SEALED ]]; then
+                  for pod in $VAULT_PODS; do
+                    oc -n {{ .Release.Namespace }} exec $pod -- vault operator unseal -tls-skip-verify ${KEYS}
+                  done
+                fi
+            envFrom:
+            - secretRef:
+                name: {{ include "vault-bootstrap.fullname" . }}
