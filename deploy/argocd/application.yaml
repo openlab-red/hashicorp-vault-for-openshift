@@ -10,14 +10,9 @@ spec:
   project: default
   source:
     path: deploy/helm/vault-install
-    repoURL: 'https://github.com/openlab-red/hashicorp-vault-for-openshift'
-    targetRevision: master
-  ignoreDifferences:
-  - group: "admissionregistration.k8s.io"
-    kind: "MutatingWebhookConfiguration"
-    jsonPointers:
-    - /webhooks/clientConfig/caBundle
+    repoURL: 'https://github.com/radudd/hashicorp-vault-for-openshift'
+    targetRevision: feature/init-vault
+    #repoURL: 'https://github.com/openlab-red/hashicorp-vault-for-openshift'
+    #targetRevision: master
   syncPolicy:
     automated: {}
-    syncOptions:
-    - RespectIgnoreDifferences=true

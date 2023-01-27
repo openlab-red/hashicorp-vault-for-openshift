@@ -12,7 +12,19 @@ Initially, one should create the required namespaces for Vault and Cert-Manager 
 oc apply -f manifests
 ```
 
-The next step would be to configure your Vault deployment in the `values.yaml` from `helm/vault-install` Helm chart. Configure at minimum the Vault route with the `base.server.route.host` parameter.
+Next, generate the certificates that will be required to create a Cert-Manager Issuer using the `script/ca-chain.sh` script
+
+```
+script/ca-chain.sh
+```
+
+Deploy these certificates on OpenShift as Secrets
+
+```
+oc create secret tls intermediate --cert=script/ca-chain/intermediate/ca.crt --key=script/ca-chain/intermediate/ca.key -n hashicorp-vault
+```
+
+At the next step, we will configure the Vault deployment using the `values.yaml` from `helm/vault-install` Helm chart. Configure at minimum the Vault route with the `base.server.route.host` parameter.
 After this, the ArgoCD Application can be deployed. 
 
 ```

@@ -1,0 +1,37 @@
+# OpenShift Client
+oc:
+  image:
+    repository: quay.io/openshift/origin-cli
+    pullPolicy: IfNotPresent
+    tag: 4.8
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+  
+vault:
+  init: True
+  auth: True
+  serviceAccount:
+    name: vault
+  schema: https
+  port: 8200
+  image:
+    repository: "hashicorp/vault"
+    tag: "1.8.4"
+
+init:
+  annotations: {}
+  #  "helm.sh/hook": post-install
+  #  "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  #  "helm.sh/hook-weight": "0"
+unsealed:
+  annotations: {}
+auth:
+  annotations: {}
+  #  "helm.sh/hook": post-install
+  #  "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+  #  "helm.sh/hook-weight": "1"
