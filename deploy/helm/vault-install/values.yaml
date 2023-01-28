@@ -32,7 +32,7 @@ base:
     route:
       enabled: true
       #host: <RELEASE_NAME>.apps.<DOMAIN>
-      host: vault.apps.p78vf.p78vf.sandbox2342.opentlc.com
+      host: vault.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com
     extraEnvironmentVars:
       VAULT_CACERT: "/etc/vault-tls/vault-certs/ca.crt"
       VAULT_TLS_SERVER_NAME:

@@ -1,0 +1,44 @@
+apiVersion: redhatcop.redhat.io/v1alpha1
+kind: SecretEngineMount
+metadata:
+  name: intermediate
+  annotations:
+    argocd.argoproj.io/sync-wave: "-9"
+spec:
+  authentication:
+    path: kubernetes
+    role: vault-admin
+    serviceAccount:
+      name: controller-manager
+  type: pki
+  path: pki
+  config:
+    # 1 Year
+    maxLeaseTTL: "8760h"
+---
+apiVersion: redhatcop.redhat.io/v1alpha1
+kind: PKISecretEngineConfig
+metadata:
+  name: intermediate
+  annotations:
+    argocd.argoproj.io/sync-wave: "-8"
+spec:
+  authentication:
+    path: kubernetes
+    role: vault-admin
+    serviceAccount:
+      name: controller-manager
+  path: pki/intermediate
+  commonName: vault.int.company.io
+  TTL: "8760h"
+  type: intermediate
+  privateKeyType: exported
+  country: CH
+  province: ZH
+  locality: Zurich
+  organization: Red Hat
+  maxPathLength: 1
+  issuingCertificates:
+  - https://vault-active.hashicorp-vault.svc:8200/v1/pki/intermediate/ca
+  crlDistributionPoints:
+  - https://vault-active.hashicorp-vault.svc:8200/v1/pki/intermediate/crl
