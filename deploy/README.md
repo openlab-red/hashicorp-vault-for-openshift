@@ -1,71 +1,76 @@
 # About
 
-Using the resources in this folder, one can deploy OpenShift Cert-Manager operator and an instance of HashiCorp Vault using certificates issued by Cert-Manager. 
+With the materials provided in this folder, it is possible to deploy the OpenShift Cert-Manager operator and an instance of HashiCorp Vault using certificates issued by Cert-Manager. These resources will allow you to set up a secure and efficient system for managing your certificates, ensuring that your applications and services are properly secured.
 
-# How
+## How
 
-> **_PREREQUISITES:_** An OpenShift 4 cluster with OpenShift GitOps operator installed.
+### Prerequisites
 
-Initially, one should create the required namespaces for Vault and Cert-Manager and create the appropiate RBAC rules for ArgoCD service account to be able to deploy all the required resources.
+An OpenShift 4 cluster with the OpenShift GitOps operator installed can be used to manage and automate the deployment of applications and configurations using Git-based version control. This allows for easy collaboration and rollbacks, as well as the ability to track changes and ensure that the cluster is always in a known state.
 
-```
-oc apply -f manifests
-```
+One should start by creating the necessary namespaces for Vault and Cert-Manager, and then set up the appropriate RBAC rules for the ArgoCD service account to be able to deploy all the necessary resources. This will ensure that the deployment of the OpenShift Cert-Manager operator and an instance of HashiCorp Vault using certificates issued by Cert-Manager can proceed smoothly.
 
-Next, generate the certificates that will be required to create a Cert-Manager Issuer using the `script/ca-chain.sh` script
-
-```
-script/ca-chain.sh
+```bash
+oc apply -f prereq/
 ```
 
-Deploy these certificates on OpenShift as Secrets
+Next, generate the necessary certificate authority chain using the `../script/ca-chain.sh` script before creating a Cert-Manager Issuer and deploying the necessary resources.
 
-```
-oc create secret tls intermediate --cert=script/ca-chain/intermediate/ca.crt --key=script/ca-chain/intermediate/ca.key -n hashicorp-vault
-```
-
-At the next step, we will configure the Vault deployment using the `values.yaml` from `helm/vault-install` Helm chart. Configure at minimum the Vault route with the `base.server.route.host` parameter.
-After this, the ArgoCD Application can be deployed. 
-
-```
-oc apply -f argocd/application.yaml
+```bash
+sh ../script/ca-chain.sh
 ```
 
-Login to ArgoCD UI and check if the application is getting synced and Vault with Cert-Manager are getting deployed.
+Deploy the intermediate certificate authority as Secrets on the OpenShift cluster:
 
-In the console, you can check the status of Vault pods
-
+```bash
+oc create secret tls intermediate --cert=ca-chain/intermediate/ca.crt --key=ca-chain/intermediate/ca.key -n hashicorp-vault
 ```
+
+In the next step, we will use the `values.yaml` file from the `helm/vault-install` Helm chart to configure the Vault deployment. We will set the `base.server.route.host` parameter to the cluster's base domain obtained by running `oc get dns cluster -o jsonpath='{.spec.baseDomain}'`. 
+
+For instance: `echo vault.apps.$(oc get dns cluster -o jsonpath='{.spec.baseDomain}')`
+
+Once this is done, we can proceed to deploy the ArgoCD Application.
+
+```bash
+oc apply -f argocd/cert-manager.yaml
+oc apply -f argocd/vault.yaml
+```
+
+At this stage, log in to the ArgoCD user interface and verify that the application is being synced and that Vault and Cert-Manager are being deployed. Additionally, you can check the status of the Vault pods within the console.
+
+```bash
 oc get pod -n hashicorp-vault
 ```
 
-The next step would be to initialiaze Vault
+The next step is to initialize and unseal Vault. This is already done by utilizing the `vault-install` Helm chart, which includes a bootstrap script that automates the process. 
+It is important to note that this method should not be used in a production environment, and a proper unsealing mechanism, such as one provided by Vault, should be employed instead.
 
-```
-oc -n hashicorp-vault exec -ti vault-0 -- vault operator init -key-threshold=1 -key-shares=1
-```
-```
-Unseal Key 1: 7tbxdHjNqLsCAS16b0ac92jb+uvXEVSPwFZyf2Ln8Gk=
 
-Initial Root Token: s.lSHpKvhYhjy5xwR0wtkXEk6H
-```
+At this point we are ready to install the Vault Config Operator, please configure the ArgoCD application:
 
-Now it's time to unseal all Vault instances
-```
-oc -n hashicorp-vault exec -ti vault-0 -- vault operator unseal
-```
-```
-Unseal Key (will be hidden):
-```
-```
-oc -n hashicorp-vault exec -ti vault-1 -- vault operator unseal
-```
-```
-Unseal Key (will be hidden):
-```
-```
-oc -n hashicorp-vault exec -ti vault-2 -- vault operator unseal
-```
-```
-Unseal Key (will be hidden):
+
+TOOD: Automate with server side apply and job/workflow
+```bash
+
+oc create configmap int-ca --from-file=ca-chain/intermediate/ca.crt -n vault-config-operator
+
+cat <<EOF > ./policy.hcl
+path "/*" {
+    capabilities = ["create", "read", "update", "delete", "list","sudo"]
+}
+EOF
+
+vault policy write -tls-skip-verify vault-admin ./policy.hcl
+
+oc apply -f argocd/vault-config-operator.yaml
+
+JWT=$(oc sa get-token controller-manager)
+KUBERNETES_HOST=https://kubernetes.default.svc:443
+
+oc extract configmap/kube-root-ca.crt -n vault-config-operator
+
+vault write -tls-skip-verify auth/kubernetes/config token_reviewer_jwt=$JWT kubernetes_host=$KUBERNETES_HOST kubernetes_ca_cert=@./ca.crt
+vault write -tls-skip-verify auth/kubernetes/role/vault-admin bound_service_account_names=controller-manager bound_service_account_namespaces=vault-config-operator policies=vault-admin ttl=1h
+
 ```

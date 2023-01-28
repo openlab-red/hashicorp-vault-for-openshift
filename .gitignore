@@ -227,5 +227,9 @@ tags
 # End of https://www.gitignore.io/api/vim,emacs,visualstudiocode,intellij,macos,java,maven
 
 labs/public
-
-
+**/*/ca-chain/
+**/*/ca.crt
+**/*/policy.hcl
+ca-chain/
+ca.crt
+policy.hcl
