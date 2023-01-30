@@ -1,0 +1,63 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-admin
+  namespace: hashicorp-vault
+  labels:
+    app.kubernetes.io/instance: vault-config-operator
+  annotations:
+    kubernetes.io/service-account.name: controller-manager
+    argocd.argoproj.io/sync-wave: "-7"
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      name: vault-admin
+      labels:
+        app.kubernetes.io/instance: vault-config-operator
+    spec:
+      serviceAccountName: vault
+      serviceAccount: vault
+      restartPolicy: Never
+      volumes:
+      - name: controller-manager
+        secret:
+          secretName: controller-manager
+      containers:
+      - name: auth
+        image: registry.connect.redhat.com/hashicorp/vault:1.9.2-ubi
+        env:
+        - name: VAULT_ADDR
+          value: https://vault-active.hashicorp-vault.svc:8200
+        envFrom:
+        - secretRef:
+            name: vault-bootstrap
+        command:
+        - /bin/sh
+        - '-c'
+        - |
+            AUTH=$(vault auth list -tls-skip-verify |grep kubernetes|wc -l|tr -d ' ')
+
+            if [[ "$AUTH" == "0" ]]; then
+
+              JWT=$(cat /tmp/controller-manager/token)
+              KUBERNETES_HOST=https://kubernetes.default.svc:443
+
+              cat <<EOF > /tmp/policy.hcl
+              path "/*" {
+                capabilities = ["create", "read", "update", "delete", "list","sudo"]
+              }
+            EOF
+
+              vault policy write -tls-skip-verify vault-admin /tmp/policy.hcl
+
+              vault auth enable --tls-skip-verify kubernetes
+            
+              vault write --tls-skip-verify auth/kubernetes/config issuer=https://kubernetes.default.svc token_reviewer_jwt=$JWT kubernetes_host=$KUBERNETES_HOST kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            
+              vault write -tls-skip-verify auth/kubernetes/role/vault-admin bound_service_account_names=controller-manager bound_service_account_namespaces=vault-config-operator policies=vault-admin ttl=1h
+            fi
+        volumeMounts:
+         - name: controller-manager
+           mountPath: /tmp/controller-manager

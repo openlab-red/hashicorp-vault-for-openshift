@@ -26,6 +26,8 @@ Deploy the intermediate certificate authority as Secrets on the OpenShift cluste
 oc create secret tls intermediate --cert=ca-chain/intermediate/ca.crt --key=ca-chain/intermediate/ca.key -n hashicorp-vault
 ```
 
+### Vault
+
 In the next step, we will use the `values.yaml` file from the `helm/vault-install` Helm chart to configure the Vault deployment. We will set the `base.server.route.host` parameter to the cluster's base domain obtained by running `oc get dns cluster -o jsonpath='{.spec.baseDomain}'`. 
 
 For instance: `echo vault.apps.$(oc get dns cluster -o jsonpath='{.spec.baseDomain}')`
@@ -46,31 +48,29 @@ oc get pod -n hashicorp-vault
 The next step is to initialize and unseal Vault. This is already done by utilizing the `vault-install` Helm chart, which includes a bootstrap script that automates the process. 
 It is important to note that this method should not be used in a production environment, and a proper unsealing mechanism, such as one provided by Vault, should be employed instead.
 
+### Vault Config Operator
 
 At this point we are ready to install the Vault Config Operator, please configure the ArgoCD application:
 
-
-TOOD: Automate with server side apply and job/workflow
+TOOD: Check Cluster Proxy trusted CA.
 ```bash
-
 oc create configmap int-ca --from-file=ca-chain/intermediate/ca.crt -n vault-config-operator
-
-cat <<EOF > ./policy.hcl
-path "/*" {
-    capabilities = ["create", "read", "update", "delete", "list","sudo"]
-}
-EOF
-
-vault policy write -tls-skip-verify vault-admin ./policy.hcl
-
-oc apply -f argocd/vault-config-operator.yaml
-
-JWT=$(oc sa get-token controller-manager)
-KUBERNETES_HOST=https://kubernetes.default.svc:443
-
-oc extract configmap/kube-root-ca.crt -n vault-config-operator
-
-vault write -tls-skip-verify auth/kubernetes/config token_reviewer_jwt=$JWT kubernetes_host=$KUBERNETES_HOST kubernetes_ca_cert=@./ca.crt
-vault write -tls-skip-verify auth/kubernetes/role/vault-admin bound_service_account_names=controller-manager bound_service_account_namespaces=vault-config-operator policies=vault-admin ttl=1h
-
 ```
+
+```bash
+oc apply -f argocd/vault-config-operator.yaml
+```
+
+### PKI Engine
+It is time to create the CA chain hierarchy with an offline root CA and online intermediate CAs in Vault for each application namespace.
+
+Having a dedicated intermediate CA per organization or team can increase security and gain greater control over the chain of trust in your ecosystem, allowing you to trust only certificates issued by your trust model.
+
+
+
+At this point, it is time to configure the PKI for the application namespace, for this example we configure the team-one namespace.
+
+### Application
+
+TODO
+

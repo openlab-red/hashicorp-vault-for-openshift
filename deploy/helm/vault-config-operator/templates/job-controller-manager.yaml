@@ -1,0 +1,32 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: vault-admin
+  namespace: openshift-gitops
+  labels:
+    app.kubernetes.io/instance: vault-config-operator
+  annotations:
+    kubernetes.io/service-account.name: controller-manager
+    argocd.argoproj.io/sync-wave: "-8"
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      name: vault-admin
+      labels:
+        app.kubernetes.io/instance: vault-config-operator
+    spec:
+      serviceAccountName: openshift-gitops-argocd-application-controller
+      serviceAccount: openshift-gitops-argocd-application-controller
+      restartPolicy: Never
+      containers:
+      - name: init
+        image: quay.io/openshift/origin-cli:4.11
+        command:
+        - /bin/bash
+        - '-c'
+        - |
+          oc delete secret controller-manager -n hashicorp-vault --ignore-not-found
+          oc extract secret/controller-manager -n vault-config-operator --to=/tmp
+          oc create secret generic controller-manager --from-file=token=/tmp/token -n hashicorp-vault 
