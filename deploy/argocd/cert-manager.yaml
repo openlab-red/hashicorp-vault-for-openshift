@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    path: deploy/resources/cert-manager
+    repoURL: 'https://github.com/openlab-red/hashicorp-vault-for-openshift'
+    targetRevision: master
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-operators
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true

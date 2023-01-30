@@ -94,7 +94,7 @@ openssl req -x509 -new -nodes -key ca.key -sha256 -days 1024 -out ca.crt -extens
 
 # Generate the Intermediate CA Private Key
 
-cd ../intermediate
+cd ${CERT_ROOT}/ca-chain/intermediate/
 
 openssl genrsa -out ca.key 2048
 
@@ -104,4 +104,7 @@ openssl req -new -sha256 -key ca.key -out ca.csr
 
 # Create the intermediate certificate
 
-openssl ca -config ../root/openssl.cnf -extensions v3_intermediate_ca -days 365 -notext -md sha256 -in ca.csr -out ca.crt
+openssl ca -config ${CERT_ROOT}/ca-chain/root/openssl.cnf -extensions v3_intermediate_ca -days 365 -notext -md sha256 -in ca.csr -out ca.crt
+
+cd ..
+cd ..
