@@ -7,4 +7,4 @@ metadata:
     app.kubernetes.io/instance: vault-config-operator
   annotations:
     kubernetes.io/service-account.name: controller-manager
-    argocd.argoproj.io/sync-wave: "-9"
+    argocd.argoproj.io/sync-wave: "-15"
