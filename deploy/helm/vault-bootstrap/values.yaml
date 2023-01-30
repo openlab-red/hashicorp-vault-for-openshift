@@ -3,7 +3,7 @@ oc:
   image:
     repository: quay.io/openshift/origin-cli
     pullPolicy: IfNotPresent
-    tag: 4.8
+    tag: 4.11
 
 serviceAccount:
   # Specifies whether a service account should be created
