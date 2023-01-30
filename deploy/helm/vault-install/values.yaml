@@ -6,7 +6,7 @@ base:
     tlsDisable: false
     openshift: true
   injector:
-    #enabled: false
+    enabled: false
     image:
       repository: "registry.connect.redhat.com/hashicorp/vault-k8s"
       tag: "0.14.2-ubi"
@@ -83,7 +83,7 @@ bootstrap:
       repository: registry.connect.redhat.com/hashicorp/vault
       tag: "1.9.2-ubi"
     init: true
-    auth: true
+    auth: False
   serviceAccount:
     name: "vault-bootstrap"
 

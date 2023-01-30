@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    path: deploy/resources/vault-config-operator
+    path: deploy/helm/vault-config-operator
     repoURL: 'https://github.com/openlab-red/hashicorp-vault-for-openshift'
     targetRevision: master
   destination:
