@@ -14,5 +14,3 @@ spec:
     targetRevision: master
   syncPolicy:
     automated: {}
-    syncOptions:
-    - CreateNamespace=true
