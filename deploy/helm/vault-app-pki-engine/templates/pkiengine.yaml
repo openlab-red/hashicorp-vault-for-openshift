@@ -12,7 +12,8 @@ spec:
     role: team-one
   path: app-pki/team-one
   commonName: team-one.vault.int.company.io
-  TTL: "8760h"
+  CRLExpiry: 72h0m0s
+  TTL: 8760h0m0s
   type: intermediate
   privateKeyType: exported
   internalSign:
@@ -43,4 +44,4 @@ spec:
   allowGlobDomains: true
   allowedURISans:
   - "*-team-one.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com"
-  maxTTL: "8760h"
+  maxTTL: 8760h0m0s
