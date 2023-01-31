@@ -7,8 +7,8 @@ spec:
   project: default
   source:
     path: deploy/helm/vault-config-operator
-    repoURL: 'https://github.com/openlab-red/hashicorp-vault-for-openshift'
-    targetRevision: master
+    repoURL: 'https://github.com/radudd/hashicorp-vault-for-openshift'
+    targetRevision: bugfix/vault-config-operator
   destination:
     server: https://kubernetes.default.svc
     namespace: vault-config-operator

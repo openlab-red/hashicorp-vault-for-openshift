@@ -10,9 +10,8 @@ spec:
   project: default
   source:
     path: deploy/helm/vault-install
-    repoURL: 'https://github.com/openlab-red/hashicorp-vault-for-openshift'
-    targetRevision: master
+    #repoURL: 'https://github.com/eye0fra/hashicorp-vault-for-openshift'
+    repoURL: 'https://github.com/radudd/hashicorp-vault-for-openshift'
+    targetRevision: bugfix/vault-config-operator
   syncPolicy:
     automated: {}
-    syncOptions:
-    - CreateNamespace=true
