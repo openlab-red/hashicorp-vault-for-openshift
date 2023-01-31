@@ -52,11 +52,6 @@ It is important to note that this method should not be used in a production envi
 
 At this point we are ready to install the Vault Config Operator, please configure the ArgoCD application:
 
-TOOD: Check Cluster Proxy trusted CA.
-```bash
-oc create configmap int-ca --from-file=ca-chain/intermediate/ca.crt -n vault-config-operator
-```
-
 ```bash
 oc apply -f argocd/vault-config-operator.yaml
 ```
