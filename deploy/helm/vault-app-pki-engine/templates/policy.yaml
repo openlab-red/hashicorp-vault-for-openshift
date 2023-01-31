@@ -11,7 +11,15 @@ spec:
     serviceAccount:
       name: controller-manager
   policy: |
-  
+    # query existing mounts
+    path "/sys/mounts" {
+      capabilities = [ "list", "read"]
+      allowed_parameters = {
+        "type" = ["pki"]
+        "*"   = []
+      }
+    }
+
     # mount pki secret engines
     path "/sys/mounts/app-pki/team-one*" {
       capabilities = ["create", "read", "update", "delete", "list"]
