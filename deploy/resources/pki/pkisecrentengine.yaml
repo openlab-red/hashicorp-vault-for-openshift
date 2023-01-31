@@ -5,6 +5,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-8"
 spec:
+  externalSignSecret:
+    name: signed-intermediate
   authentication:
     path: kubernetes
     role: vault-admin
@@ -12,7 +14,8 @@ spec:
       name: controller-manager
   path: pki/intermediate
   commonName: vault.int.company.io
-  TTL: "8760h"
+  TTL: 8760h0m0s
+  CRLExpiry: 72h0m0s
   type: intermediate
   privateKeyType: exported
   country: CH
@@ -22,5 +25,5 @@ spec:
   maxPathLength: 1
   issuingCertificates:
   - https://vault-active.hashicorp-vault.svc:8200/v1/pki/intermediate/ca
-  crlDistributionPoints:
+  CRLDistributionPoints:
   - https://vault-active.hashicorp-vault.svc:8200/v1/pki/intermediate/crl

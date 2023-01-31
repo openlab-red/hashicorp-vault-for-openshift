@@ -3,6 +3,7 @@ apiVersion: redhatcop.redhat.io/v1alpha1
 kind: PKISecretEngineConfig
 metadata:
   name: team-one
+  namespace: team-one
   annotations:
     argocd.argoproj.io/sync-wave: "-4"
 spec:
@@ -18,13 +19,14 @@ spec:
     name: pki/intermediate
   issuingCertificates:
   - https://vault-active.hashicorp-vault.svc:8200/v1/app-pki/team-one/ca
-  crlDistributionPoints:
+  CRLDistributionPoints:
   - https://vault-active.hashicorp-vault.svc:8200/v1/pki/team-one/crl
 ---
 apiVersion: redhatcop.redhat.io/v1alpha1
 kind: PKISecretEngineRole
 metadata:
   name: team-one
+  namespace: team-one
   annotations:
     argocd.argoproj.io/sync-wave: "-3"
 spec:
