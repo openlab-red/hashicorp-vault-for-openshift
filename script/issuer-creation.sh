@@ -2,7 +2,7 @@
 
 export CA_BUNDLE=$(oc get secret vault-certs -n hashicorp-vault -o json | jq -r '.data."ca.crt"')
 
-oc apply -f ../examples/quarkus-mtls-example/default-token.yaml
+oc apply -f default-token.yaml
 
 cat <<EOF| oc apply -f -
 apiVersion: cert-manager.io/v1
