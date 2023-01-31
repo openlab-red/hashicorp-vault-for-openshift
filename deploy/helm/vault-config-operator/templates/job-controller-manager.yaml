@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: vault-admin
+  name: controller-manager 
   namespace: openshift-gitops
   labels:
     app.kubernetes.io/instance: vault-config-operator
@@ -13,7 +13,7 @@ spec:
   backoffLimit: 5
   template:
     metadata:
-      name: vault-admin
+      name: controller-manager 
       labels:
         app.kubernetes.io/instance: vault-config-operator
     spec:
@@ -27,6 +27,16 @@ spec:
         - /bin/bash
         - '-c'
         - |
+
+          # This can be done with Shared Resource feature gate (currently in TP)
+          
           oc delete secret controller-manager -n hashicorp-vault --ignore-not-found
           oc extract secret/controller-manager -n vault-config-operator --to=/tmp
-          oc create secret generic controller-manager --from-file=token=/tmp/token -n hashicorp-vault 
+          oc create secret generic controller-manager --from-file=token=/tmp/token -n hashicorp-vault
+
+          # This can be done with additional Trusted CA
+          mkdir -p /tmp/intermediate
+          oc delete configmap int-ca -n vault-config-operator --ignore-not-found
+          oc extract secret/intermediate -n hashicorp-vault --to=/tmp/intermediate
+          oc create configmap int-ca --from-file=/tmp/intermediate/ca.crt -n vault-config-operator
+

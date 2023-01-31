@@ -5,6 +5,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "-8"
 spec:
+  externalSignSecret:
+    name: signed-intermediate
   authentication:
     path: kubernetes
     role: vault-admin
@@ -12,7 +14,8 @@ spec:
       name: controller-manager
   path: pki/intermediate
   commonName: vault.int.company.io
-  TTL: "8760h"
+  TTL: 8760h0m0s
+  CRLExpiry: 72h0m0s
   type: intermediate
   privateKeyType: exported
   country: CH
@@ -22,49 +25,5 @@ spec:
   maxPathLength: 1
   issuingCertificates:
   - https://vault-active.hashicorp-vault.svc:8200/v1/pki/intermediate/ca
-  crlDistributionPoints:
+  CRLDistributionPoints:
   - https://vault-active.hashicorp-vault.svc:8200/v1/pki/intermediate/crl
----
-apiVersion: redhatcop.redhat.io/v1alpha1
-kind: PKISecretEngineConfig
-metadata:
-  name: team-one
-  annotations:
-    argocd.argoproj.io/sync-wave: "-4"
-spec:
-  authentication:
-    path: app-kubernetes/team-one
-    role: team-one
-  path: app-pki/team-one
-  commonName: team-one.vault.int.company.io
-  TTL: "8760h"
-  type: intermediate
-  privateKeyType: exported
-  internalSign:
-    name: pki/intermediate
-  issuingCertificates:
-  - https://vault-active.hashicorp-vault.svc:8200/v1/app-pki/team-one/ca
-  crlDistributionPoints:
-  - https://vault-active.hashicorp-vault.svc:8200/v1/pki/team-one/crl
----
-apiVersion: redhatcop.redhat.io/v1alpha1
-kind: PKISecretEngineRole
-metadata:
-  name: team-one
-  annotations:
-    argocd.argoproj.io/sync-wave: "-3"
-spec:
-  authentication:
-    path: app-kubernetes/team-one
-    role: team-one
-  path: app-pki/team-one
-  allowedDomains:
-   - team-one.vault.int.company.io
-   - team-one.svc
-   - "*-team-one.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com"
-  allowSubdomains: true
-  allowedOtherSans: "*"
-  allowGlobDomains: true
-  allowedURISans:
-  - "*-team-one.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com"
-  maxTTL: "8760h"

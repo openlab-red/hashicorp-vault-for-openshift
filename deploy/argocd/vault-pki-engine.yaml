@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: vault-pki-engine
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    path: deploy/resources/pki
+    repoURL: 'https://github.com/openlab-red/hashicorp-vault-for-openshift'
+    targetRevision: master
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: vault-config-operator
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
