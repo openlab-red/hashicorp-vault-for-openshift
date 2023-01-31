@@ -28,7 +28,7 @@ spec:
   tokenReviewerServiceAccount:
     name: controller-manager
   path: app-kubernetes
-  DisableISSValidation: True
+  disableISSValidation: True
 ---
 apiVersion: redhatcop.redhat.io/v1alpha1
 kind: KubernetesAuthEngineRole
