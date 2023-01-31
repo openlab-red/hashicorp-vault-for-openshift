@@ -72,6 +72,14 @@ Signing the vault intermediate certificate.
 oc extract secret/intermediate --keys=csr -n vault-config-operator
 openssl ca -config ca-chain/root/openssl.cnf -extensions v3_intermediate_ca -days 365 -notext -md sha256 -in csr -out tls.crt
 oc create secret generic signed-intermediate --from-file=tls.crt  -n vault-config-operator
+
+cat <<EOF > patch-pki.yaml
+spec:
+  externalSignSecret:
+    name: signed-intermediate
+EOF
+
+oc patch pkisecretengineconfig intermediate --type=merge --patch-file patch-pki.yaml -n vault-config-operator
 ```
 
 At this point, it is time to configure the PKI for the application namespace, for this example we configure the team-one namespace.
