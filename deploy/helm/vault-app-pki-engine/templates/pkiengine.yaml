@@ -3,6 +3,7 @@ apiVersion: redhatcop.redhat.io/v1alpha1
 kind: PKISecretEngineConfig
 metadata:
   name: team-one
+  namespace: team-one
   annotations:
     argocd.argoproj.io/sync-wave: "-4"
 spec:
@@ -11,20 +12,22 @@ spec:
     role: team-one
   path: app-pki/team-one
   commonName: team-one.vault.int.company.io
-  TTL: "8760h"
+  CRLExpiry: 72h0m0s
+  TTL: 8760h0m0s
   type: intermediate
   privateKeyType: exported
   internalSign:
     name: pki/intermediate
   issuingCertificates:
   - https://vault-active.hashicorp-vault.svc:8200/v1/app-pki/team-one/ca
-  crlDistributionPoints:
+  CRLDistributionPoints:
   - https://vault-active.hashicorp-vault.svc:8200/v1/pki/team-one/crl
 ---
 apiVersion: redhatcop.redhat.io/v1alpha1
 kind: PKISecretEngineRole
 metadata:
   name: team-one
+  namespace: team-one
   annotations:
     argocd.argoproj.io/sync-wave: "-3"
 spec:
@@ -41,4 +44,4 @@ spec:
   allowGlobDomains: true
   allowedURISans:
   - "*-team-one.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com"
-  maxTTL: "8760h"
+  maxTTL: 8760h0m0s

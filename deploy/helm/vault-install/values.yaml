@@ -13,7 +13,7 @@ base:
       #tag: "1.1.0-ubi"
     agentImage:
       repository: "registry.connect.redhat.com/hashicorp/vault"
-      tag: "1.9.2-ubi"
+      tag: "1.9.6-ubi"
       #tag: "1.12.1-ubi"
     webhook:
       annotations:
@@ -28,7 +28,7 @@ base:
   server:
     image:
       repository: "registry.connect.redhat.com/hashicorp/vault"
-      tag: "1.12.1-ubi"
+      tag: "1.9.6-ubi"
     route:
       enabled: true
       #host: <RELEASE_NAME>.apps.<DOMAIN>

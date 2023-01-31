@@ -62,8 +62,32 @@ It is time to create the CA chain hierarchy with an offline root CA and online i
 Having a dedicated intermediate CA per organization or team can increase security and gain greater control over the chain of trust in your ecosystem, allowing you to trust only certificates issued by your trust model.
 
 
+```bash
+oc apply -f argocd/vault-pki-engine.yaml
+```
+
+Signing the vault intermediate certificate.
+
+```bash
+oc extract secret/intermediate --keys=csr -n vault-config-operator
+openssl ca -config ca-chain/root/openssl.cnf -extensions v3_intermediate_ca -days 365 -notext -md sha256 -in csr -out tls.crt
+oc create secret generic signed-intermediate --from-file=tls.crt  -n vault-config-operator
+
+cat <<EOF > patch-pki.yaml
+spec:
+  externalSignSecret:
+    name: signed-intermediate
+EOF
+
+oc patch pkisecretengineconfig intermediate --type=merge --patch-file patch-pki.yaml -n vault-config-operator
+```
 
 At this point, it is time to configure the PKI for the application namespace, for this example we configure the team-one namespace.
+
+
+```bash
+oc apply -f argocd/vault-app-pki-engine.yaml
+```
 
 ### Application
 

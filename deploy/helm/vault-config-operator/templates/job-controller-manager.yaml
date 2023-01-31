@@ -28,6 +28,7 @@ spec:
         - '-c'
         - |
 
+          
           # This can be done with Shared Resource feature gate (currently in TP)
           
           oc delete secret controller-manager -n hashicorp-vault --ignore-not-found
@@ -38,5 +39,5 @@ spec:
           mkdir -p /tmp/intermediate
           oc delete configmap int-ca -n vault-config-operator --ignore-not-found
           oc extract secret/intermediate -n hashicorp-vault --to=/tmp/intermediate
-          oc create configmap int-ca --from-file=/tmp/intermediate/ca.crt -n vault-config-operator
+          oc create configmap int-ca --from-file=ca.crt=/tmp/intermediate/tls.crt -n vault-config-operator
 
