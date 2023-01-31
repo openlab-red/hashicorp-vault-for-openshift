@@ -38,5 +38,5 @@ spec:
           mkdir -p /tmp/intermediate
           oc delete configmap int-ca -n vault-config-operator --ignore-not-found
           oc extract secret/intermediate -n hashicorp-vault --to=/tmp/intermediate
-          oc create configmap int-ca --from-file=/tmp/intermediate/ca.crt -n vault-config-operator
+          oc create configmap int-ca --from-file=ca.crt=/tmp/intermediate/tls.crt -n vault-config-operator
 
