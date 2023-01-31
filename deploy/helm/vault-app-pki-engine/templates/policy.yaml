@@ -2,6 +2,8 @@ apiVersion: redhatcop.redhat.io/v1alpha1
 kind: Policy
 metadata:
   name: team-one-pki-engine
+  annotations:
+    argocd.argoproj.io/sync-wave: "-6"
 spec:
   authentication:
     path: kubernetes
