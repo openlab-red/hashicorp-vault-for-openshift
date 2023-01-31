@@ -1,0 +1,31 @@
+apiVersion: redhatcop.redhat.io/v1alpha1
+kind: Policy
+metadata:
+  name: team-one-pki-engine
+spec:
+  authentication:
+    path: kubernetes
+    role: vault-admin
+    serviceAccount:
+      name: controller-manager
+  policy: |
+  
+    # mount pki secret engines
+    path "/sys/mounts/app-pki/team-one*" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
+
+    # tune
+    path "/sys/mounts/app-pki/team-one/tune" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
+
+    # internal sign pki
+    path "pki/intermediate/root/sign-intermediate" {
+      capabilities = ["create", "read", "update", "list"]
+    }
+
+    # pki 
+    path "app-pki/team-one*" {
+      capabilities = ["create", "read", "update", "delete", "list"]
+    }
