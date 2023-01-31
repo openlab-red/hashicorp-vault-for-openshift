@@ -1,7 +1,7 @@
 apiVersion: redhatcop.redhat.io/v1alpha1
 kind: Policy
 metadata:
-  name: team-one-pki-engine
+  name: "{{ .Release.Namespace }}-pki-engine"
   annotations:
     argocd.argoproj.io/sync-wave: "-6"
 spec:
@@ -21,12 +21,12 @@ spec:
     }
 
     # mount pki secret engines
-    path "/sys/mounts/app-pki/team-one*" {
+    path "/sys/mounts/app-pki/{{ .Release.Namespace }}*" {
       capabilities = ["create", "read", "update", "delete", "list"]
     }
 
     # tune
-    path "/sys/mounts/app-pki/team-one/tune" {
+    path "/sys/mounts/app-pki/{{ .Release.Namespace }}/tune" {
       capabilities = ["create", "read", "update", "delete", "list"]
     }
 
@@ -36,6 +36,6 @@ spec:
     }
 
     # pki 
-    path "app-pki/team-one*" {
+    path "app-pki/{{ .Release.Namespace }}*" {
       capabilities = ["create", "read", "update", "delete", "list"]
     }

@@ -2,16 +2,16 @@
 apiVersion: redhatcop.redhat.io/v1alpha1
 kind: PKISecretEngineConfig
 metadata:
-  name: team-one
-  namespace: team-one
+  name: "{{ .Release.Namespace }}"
+  namespace: "{{ .Release.Namespace }}"
   annotations:
     argocd.argoproj.io/sync-wave: "-4"
 spec:
   authentication:
-    path: app-kubernetes/team-one
-    role: team-one
-  path: app-pki/team-one
-  commonName: team-one.vault.int.company.io
+    path: app-kubernetes/{{ .Release.Namespace }}
+    role: "{{ .Release.Namespace }}"
+  path: app-pki/{{ .Release.Namespace }}
+  commonName: "{{ .Release.Namespace }}.vault.int.company.io"
   CRLExpiry: 72h0m0s
   TTL: 8760h0m0s
   type: intermediate
@@ -19,29 +19,29 @@ spec:
   internalSign:
     name: pki/intermediate
   issuingCertificates:
-  - https://vault-active.hashicorp-vault.svc:8200/v1/app-pki/team-one/ca
+  - https://vault-active.hashicorp-vault.svc:8200/v1/app-pki/{{ .Release.Namespace }}/ca
   CRLDistributionPoints:
-  - https://vault-active.hashicorp-vault.svc:8200/v1/pki/team-one/crl
+  - https://vault-active.hashicorp-vault.svc:8200/v1/pki/{{ .Release.Namespace }}/crl
 ---
 apiVersion: redhatcop.redhat.io/v1alpha1
 kind: PKISecretEngineRole
 metadata:
-  name: team-one
-  namespace: team-one
+  name: "{{ .Release.Namespace }}"
+  namespace: "{{ .Release.Namespace }}"
   annotations:
     argocd.argoproj.io/sync-wave: "-3"
 spec:
   authentication:
-    path: app-kubernetes/team-one
-    role: team-one
-  path: app-pki/team-one
+    path: app-kubernetes/{{ .Release.Namespace }}
+    role: "{{ .Release.Namespace }}"
+  path: app-pki/{{ .Release.Namespace }}
   allowedDomains:
-   - team-one.vault.int.company.io
-   - team-one.svc
-   - "*-team-one.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com"
+   - "{{ .Release.Namespace }}.vault.int.company.io"
+   - "{{ .Release.Namespace }}.svc"
+   - "*-{{ .Release.Namespace }}.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com"
   allowSubdomains: true
   allowedOtherSans: "*"
   allowGlobDomains: true
   allowedURISans:
-  - "*-team-one.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com"
+  - "*-{{ .Release.Namespace }}.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com"
   maxTTL: 8760h0m0s
