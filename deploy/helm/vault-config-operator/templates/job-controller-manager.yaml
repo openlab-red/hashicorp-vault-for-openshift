@@ -28,6 +28,7 @@ spec:
         - '-c'
         - |
 
+          
           # This can be done with Shared Resource feature gate (currently in TP)
           
           oc delete secret controller-manager -n hashicorp-vault --ignore-not-found
