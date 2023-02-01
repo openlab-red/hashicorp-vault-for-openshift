@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: vault-app-pki-engine
+  name: vault-app2-pki-engine
   namespace: openshift-gitops
 spec:
   project: default
@@ -11,7 +11,7 @@ spec:
     targetRevision: master
   destination:
     server: https://kubernetes.default.svc
-    namespace: team-one
+    namespace: team-two
   syncPolicy:
     automated: {}
     syncOptions:

@@ -1,9 +1,10 @@
 apiVersion: redhatcop.redhat.io/v1alpha1
 kind: AuthEngineMount
 metadata:
-  name: team-one
+  name: "{{ .Release.Namespace }}"
   annotations:
     argocd.argoproj.io/sync-wave: "-7"
+  namespace: vault-config-operator
 spec:
   authentication:
     path: kubernetes
@@ -16,9 +17,10 @@ spec:
 apiVersion: redhatcop.redhat.io/v1alpha1
 kind: KubernetesAuthEngineConfig
 metadata:
-  name: team-one
+  name: "{{ .Release.Namespace }}"
   annotations:
     argocd.argoproj.io/sync-wave: "-6"
+  namespace: vault-config-operator
 spec:
   authentication:
     path: kubernetes
@@ -33,20 +35,21 @@ spec:
 apiVersion: redhatcop.redhat.io/v1alpha1
 kind: KubernetesAuthEngineRole
 metadata:
-  name: team-one
+  name: "{{ .Release.Namespace }}"
   annotations:
     argocd.argoproj.io/sync-wave: "-7"
+  namespace: vault-config-operator
 spec:
   authentication:
     path: kubernetes
     role: vault-admin
     serviceAccount:
       name: controller-manager
-  path: app-kubernetes/team-one
+  path: app-kubernetes/{{ .Release.Namespace }}
   policies:
-  - team-one-pki-engine
+  - "{{ .Release.Namespace }}-pki-engine"
   targetServiceAccounts:
   - default
   targetNamespaces:
     targetNamespaces:
-    - team-one
+    - "{{ .Release.Namespace }}"
