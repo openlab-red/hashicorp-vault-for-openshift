@@ -37,10 +37,10 @@ spec:
   allowedDomains:
    - "{{ .Release.Namespace }}.vault.int.company.io"
    - "{{ .Release.Namespace }}.svc"
-   - "*-{{ .Release.Namespace }}.apps.cluster-pv7vs.pv7vs.sandbox901.opentlc.com"
+   - "*-{{ .Release.Namespace }}.apps.cluster-*.*.*.opentlc.com"
   allowSubdomains: true
   allowedOtherSans: "*"
   allowGlobDomains: true
   allowedURISans:
-  - "*-{{ .Release.Namespace }}.apps.cluster-pv7vs.pv7vs.sandbox901.opentlc.com"
+  - "*-{{ .Release.Namespace }}.apps.cluster-*.*.*.opentlc.com"
   maxTTL: 8760h0m0s
