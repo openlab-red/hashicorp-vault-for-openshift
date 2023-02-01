@@ -4,6 +4,7 @@ metadata:
   name: "{{ .Release.Namespace }}-pki-engine"
   annotations:
     argocd.argoproj.io/sync-wave: "-6"
+  namespace: vault-config-operator
 spec:
   authentication:
     path: kubernetes

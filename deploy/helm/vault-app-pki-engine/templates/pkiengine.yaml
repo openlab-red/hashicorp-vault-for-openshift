@@ -15,7 +15,6 @@ spec:
   CRLExpiry: 72h0m0s
   TTL: 8760h0m0s
   type: intermediate
-  privateKeyType: exported
   internalSign:
     name: pki/intermediate
   issuingCertificates:
@@ -38,10 +37,10 @@ spec:
   allowedDomains:
    - "{{ .Release.Namespace }}.vault.int.company.io"
    - "{{ .Release.Namespace }}.svc"
-   - "*-{{ .Release.Namespace }}.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com"
+   - "*-{{ .Release.Namespace }}.apps.cluster-pv7vs.pv7vs.sandbox901.opentlc.com"
   allowSubdomains: true
   allowedOtherSans: "*"
   allowGlobDomains: true
   allowedURISans:
-  - "*-{{ .Release.Namespace }}.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com"
+  - "*-{{ .Release.Namespace }}.apps.cluster-pv7vs.pv7vs.sandbox901.opentlc.com"
   maxTTL: 8760h0m0s

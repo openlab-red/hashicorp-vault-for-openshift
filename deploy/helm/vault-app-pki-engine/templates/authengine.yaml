@@ -4,6 +4,7 @@ metadata:
   name: "{{ .Release.Namespace }}"
   annotations:
     argocd.argoproj.io/sync-wave: "-7"
+  namespace: vault-config-operator
 spec:
   authentication:
     path: kubernetes
@@ -19,6 +20,7 @@ metadata:
   name: "{{ .Release.Namespace }}"
   annotations:
     argocd.argoproj.io/sync-wave: "-6"
+  namespace: vault-config-operator
 spec:
   authentication:
     path: kubernetes
@@ -36,6 +38,7 @@ metadata:
   name: "{{ .Release.Namespace }}"
   annotations:
     argocd.argoproj.io/sync-wave: "-7"
+  namespace: vault-config-operator
 spec:
   authentication:
     path: kubernetes

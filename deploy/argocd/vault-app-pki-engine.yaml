@@ -11,7 +11,7 @@ spec:
     targetRevision: master
   destination:
     server: https://kubernetes.default.svc
-    namespace: vault-config-operator
+    namespace: team-one
   syncPolicy:
     automated: {}
     syncOptions:
