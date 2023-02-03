@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: patch-operator
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: patch-operator
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    path: deploy/resources/patch-operator
+    repoURL: 'https://github.com/openlab-red/hashicorp-vault-for-openshift'
+    targetRevision: master
+  syncPolicy:
+    automated: {}

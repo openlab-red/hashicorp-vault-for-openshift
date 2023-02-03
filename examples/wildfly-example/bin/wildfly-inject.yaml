@@ -1,0 +1,168 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: wildfly-example
+    app.kubernetes.io/name: wildfly-example
+  name: wildfly-example
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app.kubernetes.io/instance: wildfly-example
+    app.kubernetes.io/name: wildfly-example
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/instance: wildfly-example
+    app.kubernetes.io/name: wildfly-example
+  name: wildfly-example-ping
+spec:
+  ports:
+  - port: 8888
+    protocol: TCP
+    targetPort: 8888
+  selector:
+    app.kubernetes.io/instance: wildfly-example
+    app.kubernetes.io/name: wildfly-example
+---
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    app.kubernetes.io/instance: wildfly-example
+    app.kubernetes.io/name: wildfly-example
+  name: wildfly-example
+spec:
+  to:
+    kind: Service
+    name: wildfly-example
+---
+
+kind: DeploymentConfig
+apiVersion: apps.openshift.io/v1
+metadata:
+  name: wildfly-example
+  labels:
+    app.kubernetes.io/instance: wildfly-example
+    app.kubernetes.io/name: wildfly-example
+spec:
+  strategy:
+    type: Recreate
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    activeDeadlineSeconds: 21600
+  triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+          - wildfly-example
+        from:
+          kind: ImageStreamTag
+          name: 'wildfly-example:latest'
+    - type: ConfigChange
+  replicas: 1
+  revisionHistoryLimit: 10
+  test: false
+  selector:
+    app.kubernetes.io/instance: wildfly-example
+    app.kubernetes.io/name: wildfly-example
+  template:
+    metadata:
+      name: wildfly-example
+      annotations:
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/ca-key: '/var/run/secrets/kubernetes.io/serviceaccount/ca-bundle/service-ca.crt'
+        vault.hashicorp.com/agent-inject-secret-application.properties: secret/example
+        vault.hashicorp.com/agent-inject-template-application.properties: |
+          {{- with secret "secret/example" -}}
+          secret.example.password: {{ .Data.password }}
+          {{- end }}
+        vault.hashicorp.com/role: example
+      labels:
+        app.kubernetes.io/instance: wildfly-example
+        app.kubernetes.io/name: wildfly-example
+    spec:
+      containers:
+        - resources:
+            limits:
+              memory: 1Gi
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - '-c'
+                - /opt/eap/bin/readinessProbe.sh false
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: wildfly-example
+          livenessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - '-c'
+                - /opt/eap/bin/livenessProbe.sh
+            initialDelaySeconds: 60
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: JGROUPS_PING_PROTOCOL
+              value: dns.DNS_PING
+            - name: OPENSHIFT_DNS_PING_SERVICE_NAME
+              value: wildfly-example-ping
+            - name: OPENSHIFT_DNS_PING_SERVICE_PORT
+              value: '8888'
+            - name: MQ_CLUSTER_PASSWORD
+              value: p3Erg4mh
+            - name: MQ_QUEUES
+            - name: MQ_TOPICS
+            - name: JGROUPS_CLUSTER_PASSWORD
+              value: TbVMfh5I
+            - name: AUTO_DEPLOY_EXPLODED
+              value: 'false'
+          ports:
+            - name: jolokia
+              containerPort: 8778
+              protocol: TCP
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: ping
+              containerPort: 8888
+              protocol: TCP
+          imagePullPolicy: Always
+          terminationMessagePolicy: File
+          image: wildfly-example
+          volumeMounts:
+            - mountPath: /var/run/secrets/kubernetes.io/serviceaccount/ca-bundle
+              name: vault-cabundle
+      volumes:
+        - configMap:
+            name: vault-agent-cabundle
+          name: vault-cabundle
+
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: vault-agent-cabundle
+  labels:
+    app.kubernetes.io/instance: vault-agent
+    app.kubernetes.io/name: vault-agent
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+data: {}

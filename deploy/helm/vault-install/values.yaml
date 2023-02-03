@@ -10,10 +10,10 @@ base:
     image:
       repository: "registry.connect.redhat.com/hashicorp/vault-k8s"
       tag: "0.14.2-ubi"
-      #tag: "1.1.0-ubi"
+      #tag: "0.16.1-ubi"
     agentImage:
       repository: "registry.connect.redhat.com/hashicorp/vault"
-      tag: "1.9.6-ubi"
+      tag: "1.9.10-ubi"
       #tag: "1.12.1-ubi"
     webhook:
       annotations:
@@ -28,11 +28,15 @@ base:
   server:
     image:
       repository: "registry.connect.redhat.com/hashicorp/vault"
-      tag: "1.9.6-ubi"
+      tag: "1.9.10-ubi"
+      #tag: "1.12.1-ubi"
     route:
       enabled: true
-      #host: <RELEASE_NAME>.apps.<DOMAIN>
-      host: vault.apps.cluster-9fbfm.9fbfm.sandbox2233.opentlc.com
+      annotations:
+        "redhat-cop.redhat.io/patch": |
+          spec:
+            host: {{ (lookup "config.openshift.io/v1" "DNS" .metadata.name "cluster").spec.baseDomain }}
+      host: vault.apps.cluster-7kkcp.7kkcp.sandbox601.opentlc.com
     extraEnvironmentVars:
       VAULT_CACERT: "/etc/vault-tls/vault-certs/ca.crt"
       VAULT_TLS_SERVER_NAME:

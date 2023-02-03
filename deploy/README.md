@@ -91,5 +91,5 @@ oc apply -f argocd/vault-app-pki-engine.yaml
 
 ### Application
 
-TODO
+Follow [Quarkus MTLS Example](../examples/quarkus-mtls-example/README.md)
 

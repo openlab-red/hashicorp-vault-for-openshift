@@ -13,6 +13,7 @@
 8. Access client exposed application.
 
 ## Local Deployment
+
 ### Create Issuer
 ```bash
 sh ../../script/issuer-creation.sh
